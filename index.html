@@ -68,10 +68,24 @@
             transform: translateY(-2px);
             box-shadow: 6px 6px 0px #0F172A;
         }
+
+        /* 導覽頁籤專用強化樣式：字體加大、特粗、提升對比度與識別度 */
+        .tab-btn {
+            font-size: 1rem !important; /* 16px 大字體 */
+            font-weight: 900 !important; /* 特粗黑體 */
+            color: #0F172A !important;
+            transition: all 0.15s ease-in-out;
+        }
+        .tab-btn:hover {
+            background-color: #CBD5E1 !important;
+            color: #1E3A8A !important;
+        }
         .tab-btn-active {
-            border-bottom: 6px solid #2563EB !important;
-            background-color: #E0E7FF !important;
-            color: #1E40AF !important;
+            font-size: 1.05rem !important; /* 啟動項目微幅放大 */
+            font-weight: 900 !important;
+            border-bottom: 6px solid #1D4ED8 !important;
+            background-color: #DBEAFE !important; /* 明亮醒目的天空藍底 */
+            color: #1E3A8A !important;
         }
     </style>
 </head>
@@ -120,21 +134,21 @@
             </div>
         </header>
 
-        <!-- 12個獨立工作表分頁選單 -->
-        <nav class="bg-slate-200 border-b-4 border-black px-6 flex space-x-2 overflow-x-auto shadow-md">
-            <button onclick="switchTab('vsm-table')" class="tab-btn tab-btn-active py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">01. 價值流表格</button>
-            <button onclick="switchTab('vsm-chart')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">02. 價值流圖表</button>
-            <button onclick="switchTab('pareto-table')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">03. 柏拉圖表格</button>
-            <button onclick="switchTab('pareto-chart')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">04. 柏拉圖圖表</button>
-            <button onclick="switchTab('fishbone-table')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">05. 魚骨圖表格</button>
-            <button onclick="switchTab('fishbone-chart')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">06. 魚骨圖圖表</button>
-            <button onclick="switchTab('control-table')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">07. 管制圖表格</button>
-            <button onclick="switchTab('control-chart')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">08. 管制圖圖表</button>
-            <button onclick="switchTab('histo-table')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">09. 直方圖表格</button>
-            <button onclick="switchTab('histo-chart')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">10. 直方圖圖表</button>
-            <button onclick="switchTab('scatter-table')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">11. 散佈圖表格</button>
-            <button onclick="switchTab('scatter-chart')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">12. 散佈圖圖表</button>
-            <button onclick="switchTab('data')" class="tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap">📁 資料匯出與工具</button>
+        <!-- 12個獨立工作表分頁選單 (文字加大、加粗、視覺極致清晰) -->
+        <nav class="bg-slate-300 border-b-4 border-black px-4 flex space-x-2 overflow-x-auto shadow-md py-1">
+            <button onclick="switchTab('vsm-table')" class="tab-btn tab-btn-active py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">01. 價值流表格</button>
+            <button onclick="switchTab('vsm-chart')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">02. 價值流圖表</button>
+            <button onclick="switchTab('pareto-table')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">03. 柏拉圖表格</button>
+            <button onclick="switchTab('pareto-chart')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">04. 柏拉圖圖表</button>
+            <button onclick="switchTab('fishbone-table')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">05. 魚骨圖表格</button>
+            <button onclick="switchTab('fishbone-chart')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">06. 魚骨圖圖表</button>
+            <button onclick="switchTab('control-table')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">07. 管制圖表格</button>
+            <button onclick="switchTab('control-chart')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">08. 管制圖圖表</button>
+            <button onclick="switchTab('histo-table')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">09. 直方圖表格</button>
+            <button onclick="switchTab('histo-chart')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">10. 直方圖圖表</button>
+            <button onclick="switchTab('scatter-table')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">11. 散佈圖表格</button>
+            <button onclick="switchTab('scatter-chart')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">12. 散佈圖圖表</button>
+            <button onclick="switchTab('data')" class="tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap">📁 資料匯出與工具</button>
         </nav>
 
         <!-- 滿版內容主體 -->
@@ -235,7 +249,7 @@
             <div id="tab-fishbone-chart" class="tab-content hidden flex-1 flex flex-col space-y-4">
                 <div class="master-card p-6 flex-1 flex flex-col space-y-4 border-l-8 border-l-amber-600">
                     <div class="flex justify-between items-center border-b-4 border-slate-900 pb-3">
-                        <h2 class="text-xl font-black text-amber-700">📈 工作表 6：魚骨圖視覺化分析 (fishbone_chart)</h2>
+                        <h2 class="text-xl font-black text-amber-700">📈 工作表 6：可愛魚頭魚骨圖視覺化分析 (fishbone_chart)</h2>
                         <button onclick="exportFishbonePNG()" class="master-btn text-xs px-4 py-2 rounded-lg font-black">📥 下載滿版魚骨圖 PNG</button>
                     </div>
                     <div id="fishbone-container" class="w-full flex-1 min-h-[500px] bg-gradient-to-br from-amber-50 to-orange-100 border-3 border-slate-900 rounded-xl p-6 flex items-center justify-center shadow-inner overflow-x-auto"></div>
@@ -506,10 +520,10 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.className = "tab-btn py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap";
+                btn.className = "tab-btn py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap";
             });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            event.currentTarget.className = "tab-btn tab-btn-active py-3.5 px-4 font-black text-xs border-b-6 border-transparent text-slate-900 whitespace-nowrap";
+            event.currentTarget.className = "tab-btn tab-btn-active py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap";
             setTimeout(() => { updateAllCharts(); }, 50);
         }
 
@@ -779,33 +793,54 @@
             const prob = appData.fishbone.problem || "核心品質問題";
             let cats = appData.fishbone.categories;
 
+            // 充滿童趣與可愛感的魚頭設計 (粉嫩圓滾滾魚頭、大眼睛、腮紅與微笑嘴唇)
             let svg = `<svg viewBox="0 0 1000 450" class="w-full h-full max-h-[480px]">
-                <line x1="50" y1="225" x2="850" y2="225" stroke="#0F172A" stroke-width="5"/>
-                <polygon points="850,210 890,225 850,240" fill="#0F172A"/>
-                <rect x="895" y="200" width="90" height="50" rx="6" fill="#2563EB"/>
-                <text x="940" y="230" fill="#ffffff" font-size="13" font-weight="900" text-anchor="middle">${prob}</text>
+                <!-- 脊椎主骨 -->
+                <line x1="50" y1="225" x2="820" y2="225" stroke="#0F172A" stroke-width="5"/>
+                
+                <!-- 可愛魚頭群組 (放在 X=890 處) -->
+                <g transform="translate(840, 160)">
+                    <!-- 魚身體圓滑連接部 -->
+                    <polygon points="-30,65 20,40 20,90" fill="#38BDF8" stroke="#0F172A" stroke-width="3"/>
+                    <!-- 圓滾滾粉嫩魚頭主體 -->
+                    <ellipse cx="60" cy="65" rx="65" ry="55" fill="#38BDF8" stroke="#0F172A" stroke-width="3.5"/>
+                    <!-- 俏皮腮紅 -->
+                    <ellipse cx="40" cy="80" rx="12" ry="8" fill="#FDA4AF" opacity="0.8"/>
+                    <ellipse cx="80" cy="80" rx="12" ry="8" fill="#FDA4AF" opacity="0.8"/>
+                    <!-- 卡哇伊大眼睛 (外白內黑加高光) -->
+                    <circle cx="55" cy="50" r="16" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.5"/>
+                    <circle cx="58" cy="48" r="7" fill="#0F172A"/>
+                    <circle cx="61" cy="45" r="2.5" fill="#FFFFFF"/>
+                    <!-- 微笑口型 -->
+                    <path d="M 65 75 Q 75 88 85 75" fill="none" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- 頭頂俏皮小水滴/皇冠裝飾 -->
+                    <path d="M 60 5 C 60 5 45 -10 55 -20 C 62 -27 72 -15 60 5 Z" fill="#60A5FA" stroke="#0F172A" stroke-width="2"/>
+                    <!-- 魚頭文字框 (問題核心標籤) -->
+                    <rect x="-10" y="125" rx="10" ry="10" width="140" height="38" fill="#FFFFFF" stroke="#0F172A" stroke-width="3"/>
+                    <text x="60" y="148" fill="#0F172A" font-size="12" font-weight="900" text-anchor="middle">${prob}</text>
+                </g>
             `;
 
             let topCats = Object.entries(cats).slice(0, 3);
             let botCats = Object.entries(cats).slice(3, 5);
 
             topCats.forEach(([cat, val], idx) => {
-                let x = 220 + idx * 220;
+                let x = 200 + idx * 210;
                 svg += `
-                    <line x1="${x}" y1="225" x2="${x - 80}" y2="80" stroke="#2563EB" stroke-width="3"/>
-                    <text x="${x - 75}" y="65" fill="#2563EB" font-size="13" font-weight="900">${cat}</text>
-                    <line x1="${x - 65}" y1="120" x2="${x + 30}" y2="120" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
-                    <text x="${x - 65}" y="112" fill="#0F172A" font-size="11" font-weight="900">${val}</text>
+                    <line x1="${x}" y1="225" x2="${x - 70}" y2="80" stroke="#2563EB" stroke-width="3"/>
+                    <text x="${x - 65}" y="65" fill="#2563EB" font-size="13" font-weight="900">${cat}</text>
+                    <line x1="${x - 55}" y1="120" x2="${x + 30}" y2="120" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
+                    <text x="${x - 55}" y="112" fill="#0F172A" font-size="11" font-weight="900">${val}</text>
                 `;
             });
 
             botCats.forEach(([cat, val], idx) => {
-                let x = 330 + idx * 220;
+                let x = 305 + idx * 210;
                 svg += `
-                    <line x1="${x}" y1="225" x2="${x - 80}" y2="370" stroke="#2563EB" stroke-width="3"/>
-                    <text x="${x - 75}" y="390" fill="#2563EB" font-size="13" font-weight="900">${cat}</text>
-                    <line x1="${x - 65}" y1="310" x2="${x + 30}" y2="310" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
-                    <text x="${x - 65}" y="302" fill="#0F172A" font-size="11" font-weight="900">${val}</text>
+                    <line x1="${x}" y1="225" x2="${x - 70}" y2="370" stroke="#2563EB" stroke-width="3"/>
+                    <text x="${x - 65}" y="390" fill="#2563EB" font-size="13" font-weight="900">${cat}</text>
+                    <line x1="${x - 55}" y1="310" x2="${x + 30}" y2="310" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
+                    <text x="${x - 55}" y="302" fill="#0F172A" font-size="11" font-weight="900">${val}</text>
                 `;
             });
 
@@ -905,7 +940,7 @@
                 ctx.drawImage(image, 0, 0);
                 const a = document.createElement('a');
                 a.href = canvas.toDataURL('image/png');
-                a.download = '滿版魚骨圖.png';
+                a.download = '滿版可愛魚頭魚骨圖.png';
                 a.click();
             };
             image.src = url;
@@ -920,7 +955,6 @@
             setTimeout(() => exportSingleChart('scatterChart', '滿版散佈圖.png'), 1500);
         }
 
-        // 新增強大功能 1：AI 智慧瓶頸分析與精實建議
         function aiOptimizeVSM() {
             gatherDataFromDOM();
             let steps = appData.vsm;
@@ -930,7 +964,6 @@
             alert(`🤖 AI 價值流精實顧問分析報告：\n\n1. 最大瓶頸製程：【${maxStep.process}】 (Cycle Time 達 ${maxStep.ct} 秒)\n2. 改善建議：建議針對 ${maxStep.process} 導入快速換模 (SMED) 或增加平行自動化機台，可降低總加工週期 ${Math.round(maxStep.ct * 0.2)} 秒。\n3. 目前總加工週期 PT = ${totalPT} 秒。`);
         }
 
-        // 新增強大功能 2：AI 4M1E 智能腦力激盪
         function aiBrainstormFishbone() {
             document.getElementById('fish-problem').value = "CNC 加工尺寸不穩定";
             appData.fishbone.categories = {
@@ -944,14 +977,12 @@
             alert('💡 AI 已自動注入 4M1E 專業製造業腦力激盪條目！');
         }
 
-        // 新增強大功能 3：AI 全廠品質總健檢
         function runMasterAudit() {
             gatherDataFromDOM();
             let topDefect = appData.pareto.length ? [...appData.pareto].sort((a,b)=>b.count-a.count)[0].item : "無";
             alert(`🚀 AI 全廠品質總健檢報告：\n\n- 主要不良風險：【${topDefect}】\n- 管制圖狀態：量測數據在上下管制界限內，製程穩定。\n- 綜合評語：品質體系運行良好，建議持續加強 VSM 瓶頸工序改善與柏拉圖前兩大不良項目的根因對策。`);
         }
 
-        // 新增強大功能 4：經營決策戰情室
         function openMasterDashboard() {
             gatherDataFromDOM();
             let totalPT = appData.vsm.reduce((sum, s) => sum + s.ct, 0);
@@ -971,7 +1002,6 @@
             document.getElementById('master-dashboard-modal').classList.add('hidden');
         }
 
-        // 新增強大功能 5：高畫質經營戰情快照 (html2canvas)
         function generatePDFReport() {
             alert('📄 正在為您產生高畫質經營戰情快照報告，請稍候...');
             setTimeout(() => {
@@ -984,7 +1014,6 @@
             }, 500);
         }
 
-        // 12 個工作表 Excel 匯出
         function exportExcel() {
             gatherDataFromDOM();
             const wb = XLSX.utils.book_new();
@@ -1048,4 +1077,3 @@
     </script>
 </body>
 </html>
-```eof
