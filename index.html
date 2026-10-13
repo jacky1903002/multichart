@@ -227,9 +227,7 @@
                         <h2 class="text-xl font-black text-indigo-700">📈 工作表 4：柏拉圖圖表分析 (pareto_chart)</h2>
                         <button onclick="exportSingleChart('paretoChart', '柏拉圖.png')" class="master-btn text-xs px-4 py-2 rounded-lg font-black">📥 下載滿版圖表 PNG</button>
                     </div>
-                    <div class="w-full h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative">
-                        <canvas id="paretoChart"></canvas>
-                    </div>
+                    <div class="w-full flex-1 min-h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="paretoChart"></canvas></div>
                 </div>
             </div>
 
@@ -320,8 +318,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-1">
-                        <div class="xl:col-span-3 w-full h-[450px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative">
-                            <canvas id="controlChart"></canvas>
+                        <div class="xl:col-span-3 w-full min-h-[420px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative flex flex-col">
+                            <canvas id="controlChart" class="flex-1"></canvas>
                         </div>
 
                         <div id="cpk-sidebar-panel" class="p-5 bg-emerald-50 border-3 border-slate-900 rounded-xl shadow-lg flex flex-col justify-between space-y-4">
@@ -375,7 +373,7 @@
                         <h2 class="text-xl font-black text-purple-700">📈 工作表 10：直方圖常態分配分析 (histo_chart)</h2>
                         <button onclick="exportSingleChart('histoChart', '直方圖.png')" class="master-btn text-xs px-4 py-2 rounded-lg font-black">📥 下載滿版圖表 PNG</button>
                     </div>
-                    <div class="w-full h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="histoChart"></canvas></div>
+                    <div class="w-full flex-1 min-h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="histoChart"></canvas></div>
                 </div>
             </div>
 
@@ -405,7 +403,7 @@
                         <h2 class="text-xl font-black text-rose-700">📈 工作表 12：散佈圖相關性分析 (scatter_chart)</h2>
                         <button onclick="exportSingleChart('scatterChart', '散佈圖.png')" class="master-btn text-xs px-4 py-2 rounded-lg font-black">📥 下載滿版圖表 PNG</button>
                     </div>
-                    <div class="w-full h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="scatterChart"></canvas></div>
+                    <div class="w-full flex-1 min-h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="scatterChart"></canvas></div>
                 </div>
             </div>
 
@@ -512,11 +510,16 @@
                 { process: "CMM 檢驗", ct: 25, co: 10 }
             ],
             pareto: [
-                { item: "尺寸超差", count: 45 },
-                { item: "表面刮傷", count: 25 },
-                { item: "毛邊過大", count: 15 },
-                { item: "孔徑偏心", count: 10 },
-                { item: "其他", count: 5 }
+                { item: "問題5", count: 90 },
+                { item: "問題4", count: 60 },
+                { item: "問題2", count: 35 },
+                { item: "問題1", count: 20 },
+                { item: "問題8", count: 20 },
+                { item: "問題3", count: 12 },
+                { item: "問題6", count: 12 },
+                { item: "問題7", count: 8 },
+                { item: "問題9", count: 2 },
+                { item: "問題10", count: 2 }
             ],
             fishbone: {
                 problem: "加工尺寸不穩定",
@@ -599,7 +602,6 @@
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             event.currentTarget.className = "tab-btn tab-btn-active py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap";
             
-            // 延遲觸發圖表尺寸更新與重新渲染
             setTimeout(() => {
                 updateAllCharts();
                 Object.values(charts).forEach(c => {
@@ -627,7 +629,10 @@
             database.ref('users/' + currentUser.uid + '/qcDataMasterPro').once('value').then(snapshot => {
                 const val = snapshot.val();
                 if (val && val.data) {
-                    appData = val.data;
+                    appData = { ...appData, ...val.data };
+                    if (!appData.controlConfig) {
+                        appData.controlConfig = { usl: 10.15, lsl: 9.85, showSpec: true, showCpkPanel: true };
+                    }
                     if (val.lastSaved) {
                         document.getElementById('last-saved-time').textContent = "已同步 (" + val.lastSaved + ")";
                     }
@@ -644,6 +649,10 @@
         }
 
         function gatherDataFromDOM() {
+            if (!appData.controlConfig) {
+                appData.controlConfig = { usl: 10.15, lsl: 9.85, showSpec: true, showCpkPanel: true };
+            }
+
             const vsmRows = document.querySelectorAll('#vsm-tbody tr');
             appData.vsm = Array.from(vsmRows).map(row => ({
                 process: row.querySelector('.v-proc').value,
@@ -683,6 +692,10 @@
         }
 
         function populateDOMFromData() {
+            if (!appData.controlConfig) {
+                appData.controlConfig = { usl: 10.15, lsl: 9.85, showSpec: true, showCpkPanel: true };
+            }
+
             const vTbody = document.getElementById('vsm-tbody');
             vTbody.innerHTML = '';
             appData.vsm.forEach(d => addVsmRow(d.process, d.ct, d.co));
@@ -891,22 +904,27 @@
             let cumSum = 0;
             let rawCumPercent = counts.map(c => { cumSum += c; return Number(((cumSum / total) * 100).toFixed(1)); });
 
+            // 精確對齊：使用前端補空標籤與陣列對齊，使折線起點完美落在第一個直條的右上角
+            let chartLabels = ['', ...labels];
+            let chartCounts = [null, ...counts];
+            let chartCumPercent = [rawCumPercent[0], ...rawCumPercent];
+
             if (charts.pareto) charts.pareto.destroy();
             charts.pareto = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: chartLabels,
                     datasets: [
-                        { label: '不良數', data: counts, backgroundColor: '#2563EB', yAxisID: 'y', order: 2, barPercentage: 0.9, categoryPercentage: 0.9 },
-                        { label: '累積百分比 (%)', data: rawCumPercent, type: 'line', borderColor: '#EF4444', backgroundColor: '#EF4444', yAxisID: 'y1', order: 1, tension: 0.1, pointRadius: 4 }
+                        { label: '發生次數', data: chartCounts, backgroundColor: '#2563EB', yAxisID: 'y', order: 2, barPercentage: 0.9, categoryPercentage: 0.9 },
+                        { label: '累加機率 (%)', data: chartCumPercent, type: 'line', borderColor: '#EF4444', backgroundColor: '#EF4444', yAxisID: 'y1', order: 1, tension: 0.1, pointRadius: 4 }
                     ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     scales: {
                         x: { grid: { offset: false } },
-                        y: { beginAtZero: true, position: 'left', title: { display: true, text: '次數' } },
-                        y1: { beginAtZero: true, max: 100, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '累積 %' } }
+                        y: { beginAtZero: true, position: 'left', title: { display: true, text: '發生次數' } },
+                        y1: { beginAtZero: true, max: 100, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '佔發生率 %' } }
                     }
                 }
             });
@@ -972,9 +990,9 @@
             let variance = values.length > 1 ? values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length - 1) : 0.001;
             let std = Math.sqrt(variance) || 0.001;
 
-            let usl = appData.controlConfig.usl;
-            let lsl = appData.controlConfig.lsl;
-            let showSpec = appData.controlConfig.showSpec;
+            let usl = appData.controlConfig?.usl ?? 10.15;
+            let lsl = appData.controlConfig?.lsl ?? 9.85;
+            let showSpec = appData.controlConfig?.showSpec ?? true;
 
             let cp = Number(((usl - lsl) / (6 * std)).toFixed(2));
             let cpk = Number((Math.min((usl - mean) / (3 * std), (mean - lsl) / (3 * std))).toFixed(2));
@@ -1219,10 +1237,7 @@
             reader.readAsArrayBuffer(file);
         }
 
-        window.onload = () => { 
-            populateDOMFromData(); 
-            updateAllCharts(); // 確保初次載入時圖表立即渲染
-        };
+        window.onload = () => { populateDOMFromData(); };
     </script>
 </body>
 </html>
