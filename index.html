@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>品管與精實生產企業版系統 - QC & VSM Enterprise Suite</title>
+    <title>品管與精實生產企業版系統 - 活潑商業版</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -16,10 +16,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
     <style>
-        /* 企業商業版 - 米白色底與全字體加粗黑體設計 */
+        /* 活潑企業商業版 - 米白色底與加粗黑體，搭配豐富活潑的色彩與立體陰影 */
         body {
-            background-color: #F8F6F0 !important; /* 米白色底 */
-            color: #000000 !important;
+            background-color: #FAF8F2 !important; /* 溫馨米白色底 */
+            color: #111827 !important;
             font-weight: 700 !important;
         }
         * {
@@ -28,59 +28,58 @@
         }
         input, select, textarea, button, th, td, span, div, h1, h2, h3, h4, label {
             font-weight: 700 !important;
-            color: #000000;
+            color: #111827;
         }
         input, select, textarea {
             background-color: #FFFFFF !important;
-            border: 2px solid #000000 !important;
-            color: #000000 !important;
+            border: 2px solid #3b82f6 !important;
+            color: #111827 !important;
         }
         input:focus, select:focus, textarea:focus {
             outline: none !important;
-            box-shadow: 0 0 0 2px #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4) !important;
         }
         .enterprise-card {
             background-color: #FFFFFF;
-            border: 3px solid #000000;
-            box-shadow: 6px 6px 0px #000000;
-            border-radius: 0.75rem;
+            border: 3px solid #1e293b;
+            box-shadow: 6px 6px 0px #3b82f6;
+            border-radius: 1rem;
         }
         .enterprise-btn {
-            background-color: #000000;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: #FFFFFF !important;
-            border: 2px solid #000000;
+            border: 2px solid #1e293b;
             transition: all 0.2s ease;
-            box-shadow: 3px 3px 0px #cbd5e1;
+            box-shadow: 3px 3px 0px #1e293b;
         }
         .enterprise-btn:hover {
-            background-color: #1e293b;
-            transform: translateY(-1px);
-            box-shadow: 4px 4px 0px #94a3b8;
+            transform: translateY(-2px);
+            box-shadow: 5px 5px 0px #1e293b;
         }
         .tab-btn-active {
-            border-bottom: 4px solid #000000 !important;
-            background-color: #EDE9DE !important;
-            color: #000000 !important;
+            border-bottom: 5px solid #f59e0b !important;
+            background-color: #FEF3C7 !important;
+            color: #b45309 !important;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- 登入畫面 (未登入時顯示) -->
-    <div id="auth-screen" class="fixed inset-0 bg-[#1c1917] flex items-center justify-center z-50">
-        <div class="enterprise-card bg-white p-8 w-full max-w-md">
+    <div id="auth-screen" class="fixed inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-900 flex items-center justify-center z-50">
+        <div class="enterprise-card bg-white p-8 w-full max-w-md shadow-2xl">
             <div class="text-center mb-6">
-                <h1 class="text-3xl font-black text-black">品管與精實生產系統</h1>
-                <p class="text-sm text-black mt-2">請登入您的 Firebase 帳號以存取企業雲端數據</p>
+                <h1 class="text-3xl font-black text-indigo-600">🚀 品管與精實生產系統</h1>
+                <p class="text-sm text-slate-700 mt-2 font-black">請登入您的 Firebase 帳號以存取企業雲端數據</p>
             </div>
             <form id="login-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-black text-black mb-1">電子郵件</label>
-                    <input type="email" id="login-email" required class="w-full px-4 py-2.5 rounded-lg text-black" placeholder="name@company.com">
+                    <label class="block text-sm font-black text-slate-800 mb-1">電子郵件</label>
+                    <input type="email" id="login-email" required class="w-full px-4 py-2.5 rounded-lg text-slate-900" placeholder="name@company.com">
                 </div>
                 <div>
-                    <label class="block text-sm font-black text-black mb-1">密碼</label>
-                    <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-lg text-black" placeholder="••••••••">
+                    <label class="block text-sm font-black text-slate-800 mb-1">密碼</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-lg text-slate-900" placeholder="••••••••">
                 </div>
                 <div id="login-error" class="text-red-600 text-sm hidden font-black"></div>
                 <button type="submit" class="enterprise-btn w-full py-3 rounded-lg text-base">安全登入系統</button>
@@ -91,195 +90,223 @@
     <!-- 主應用程式介面 (登入後顯示) -->
     <div id="app-screen" class="hidden flex-1 flex flex-col">
         <!-- 頂部導覽列 -->
-        <header class="bg-[#1c1917] text-white shadow px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b-4 border-black">
+        <header class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b-4 border-slate-900">
             <div class="flex items-center space-x-4">
-                <h1 class="text-xl font-black tracking-wider text-white">⚡ QC & VSM 企業商業協同系統</h1>
-                <div class="flex items-center space-x-2 text-xs bg-[#292524] px-3 py-1.5 rounded-full border border-zinc-700">
-                    <span id="conn-dot" class="w-3 h-3 rounded-full bg-red-500"></span>
-                    <span id="conn-status" class="text-white">雲端連線檢查中...</span>
+                <h1 class="text-xl font-black tracking-wider text-white">🌈 QC & VSM 活力企業協同系統</h1>
+                <div class="flex items-center space-x-2 text-xs bg-white/20 px-3 py-1.5 rounded-full border border-white/30 backdrop-blur">
+                    <span id="conn-dot" class="w-3 h-3 rounded-full bg-red-400"></span>
+                    <span id="conn-status" class="text-white font-black">雲端連線檢查中...</span>
                 </div>
-                <div class="text-xs text-zinc-300 hidden sm:block">
-                    雲端狀態: <span id="last-saved-time" class="text-emerald-400">已自動同步</span>
+                <div class="text-xs text-blue-100 hidden sm:block">
+                    雲端狀態: <span id="last-saved-time" class="text-amber-300 font-black">已自動同步</span>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <span id="user-email-display" class="text-sm text-zinc-200 font-bold"></span>
-                <button id="logout-btn" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-4 py-2 rounded-lg border border-zinc-600 text-white transition">登出</button>
+                <span id="user-email-display" class="text-sm text-amber-200 font-black"></span>
+                <button id="logout-btn" class="bg-rose-500 hover:bg-rose-600 text-xs px-4 py-2 rounded-lg border-2 border-slate-900 text-white transition font-black shadow-[2px_2px_0px_#111]">登出</button>
             </div>
         </header>
 
-        <!-- 功能頁籤 (強制分離表與圖工作表) -->
-        <nav class="bg-[#EDE9DE] border-b-2 border-black px-6 flex space-x-2 overflow-x-auto shadow-sm">
-            <button onclick="switchTab('vsm')" class="tab-btn tab-btn-active py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap">0. 價值流(VSM) [表+圖分離]</button>
-            <button onclick="switchTab('pareto')" class="tab-btn py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap">1. 柏拉圖 [表+圖分離]</button>
-            <button onclick="switchTab('fishbone')" class="tab-btn py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap">2. 魚骨圖 [表+圖分離]</button>
-            <button onclick="switchTab('control')" class="tab-btn py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap">3. 管制圖 [表+圖分離]</button>
-            <button onclick="switchTab('histogram')" class="tab-btn py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap">4. 直方圖 [表+圖分離]</button>
-            <button onclick="switchTab('scatter')" class="tab-btn py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap">5. 散佈圖 [表+圖分離]</button>
-            <button onclick="switchTab('data')" class="tab-btn py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap">📁 多工作表管理與匯出</button>
+        <!-- 功能頁籤 (完整 10 個獨立工作表分類) -->
+        <nav class="bg-amber-50 border-b-2 border-slate-900 px-6 flex space-x-2 overflow-x-auto shadow-sm">
+            <button onclick="switchTab('vsm-table')" class="tab-btn tab-btn-active py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">01. 價值流表格</button>
+            <button onclick="switchTab('vsm-chart')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">02. 價值流圖表</button>
+            <button onclick="switchTab('pareto-table')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">03. 柏拉圖表格</button>
+            <button onclick="switchTab('pareto-chart')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">04. 柏拉圖圖表</button>
+            <button onclick="switchTab('fishbone-table')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">05. 魚骨圖表格</button>
+            <button onclick="switchTab('fishbone-chart')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">06. 魚骨圖圖表</button>
+            <button onclick="switchTab('control-table')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">07. 管制圖表格</button>
+            <button onclick="switchTab('control-chart')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">08. 管制圖圖表</button>
+            <button onclick="switchTab('histo-table')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">09. 直方圖表格</button>
+            <button onclick="switchTab('histo-chart')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">10. 直方圖圖表</button>
+            <button onclick="switchTab('scatter-table')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">11. 散佈圖表格</button>
+            <button onclick="switchTab('scatter-chart')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">12. 散佈圖圖表</button>
+            <button onclick="switchTab('data')" class="tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap">📁 資料匯出與備份</button>
         </nav>
 
         <!-- 內容主體 -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
 
-            <!-- 0. 價值流 VSM -->
-            <div id="tab-vsm" class="tab-content space-y-6">
-                <!-- 表格工作表 -->
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📋 工作表 A：價值流表格輸入 (表-圖對應: vsm_table ⇄ vsm_chart)</h2>
+            <!-- 1. 價值流表格 -->
+            <div id="tab-vsm-table" class="tab-content space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-blue-500">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-blue-700">📋 工作表 1：價值流表格輸入 (vsm_table)</h2>
                         <button onclick="loadDemoData('vsm')" class="enterprise-btn text-xs px-3 py-1.5 rounded">載入範例資料</button>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 space-y-4">
-                            <table class="w-full border-2 border-black text-xs">
-                                <thead class="bg-zinc-200">
-                                    <tr><th class="p-2 border-2 border-black">製程名稱</th><th class="p-2 border-2 border-black">C/T (秒)</th><th class="p-2 border-2 border-black">C/O (分)</th><th class="w-10 border-2 border-black">刪除</th></tr>
+                            <table class="w-full border-2 border-slate-800 text-xs shadow">
+                                <thead class="bg-blue-100 text-slate-900">
+                                    <tr><th class="p-2 border-2 border-slate-800">製程名稱</th><th class="p-2 border-2 border-slate-800">C/T (秒)</th><th class="p-2 border-2 border-slate-800">C/O (分)</th><th class="w-10 border-2 border-slate-800">刪除</th></tr>
                                 </thead>
                                 <tbody id="vsm-tbody"></tbody>
                             </table>
                             <button onclick="addVsmRow()" class="enterprise-btn text-xs px-4 py-2 rounded">+ 新增工序</button>
                         </div>
-                        <div class="p-4 bg-[#EDE9DE] rounded-lg border-2 border-black space-y-2 flex flex-col justify-center">
-                            <div class="font-black text-black text-sm border-b border-black pb-1">生產指標即時摘要</div>
-                            <div>總加工週期時間 (PT): <span id="vsm-pt" class="font-black text-blue-800">0</span> 秒</div>
-                            <div>生產置放庫存 (Lead Time): <span id="vsm-lt" class="font-black text-emerald-800">0</span> 秒</div>
-                            <div class="text-[11px] text-zinc-700 pt-2">✨ 系統已啟用全自動雲端同步，所有數值變更將即時寫入資料庫。</div>
+                        <div class="p-4 bg-blue-50 rounded-lg border-2 border-blue-300 space-y-2 flex flex-col justify-center">
+                            <div class="font-black text-blue-900 text-sm border-b border-blue-200 pb-1">生產指標即時摘要</div>
+                            <div>總加工週期時間 (PT): <span id="vsm-pt" class="font-black text-blue-600">0</span> 秒</div>
+                            <div>生產置放庫存 (Lead Time): <span id="vsm-lt" class="font-black text-emerald-600">0</span> 秒</div>
+                            <div class="text-[11px] text-slate-600 pt-2 font-black">⚡ 系統已全面啟用自動同步雲端資料庫功能。</div>
                         </div>
                     </div>
                 </div>
-                <!-- 圖表工作表 -->
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📈 工作表 B：價值流圖表檢視 (對應名稱: vsm_chart)</h2>
+            </div>
+
+            <!-- 2. 價值流圖表 -->
+            <div id="tab-vsm-chart" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-blue-600">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-blue-700">📈 工作表 2：價值流圖表視覺化 (vsm_chart)</h2>
                         <button onclick="exportVSMPNG()" class="enterprise-btn text-xs px-3 py-1.5 rounded">📥 下載價值流圖 PNG</button>
                     </div>
-                    <div id="vsm-container" class="w-full min-h-[380px] bg-white border-2 border-black rounded p-4 flex items-center justify-center"></div>
+                    <div id="vsm-container" class="w-full min-h-[380px] bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-slate-800 rounded p-4 flex items-center justify-center"></div>
                 </div>
             </div>
 
-            <!-- 1. 柏拉圖 -->
-            <div id="tab-pareto" class="tab-content hidden space-y-6">
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📋 工作表 A：柏拉圖表格輸入 (表-圖對應: pareto_table ⇄ pareto_chart)</h2>
+            <!-- 3. 柏拉圖表格 -->
+            <div id="tab-pareto-table" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-indigo-500">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-indigo-700">📋 工作表 3：柏拉圖表格輸入 (pareto_table)</h2>
                         <button onclick="loadDemoData('pareto')" class="enterprise-btn text-xs px-3 py-1.5 rounded">載入範例資料</button>
                     </div>
-                    <table class="w-full border-2 border-black text-sm">
-                        <thead class="bg-zinc-200">
-                            <tr><th class="p-2 border-2 border-black">不良項目</th><th class="p-2 border-2 border-black">次數</th><th class="w-10 border-2 border-black">刪除</th></tr>
+                    <table class="w-full border-2 border-slate-800 text-sm shadow">
+                        <thead class="bg-indigo-100 text-slate-900">
+                            <tr><th class="p-2 border-2 border-slate-800">不良項目</th><th class="p-2 border-2 border-slate-800">次數</th><th class="w-10 border-2 border-slate-800">刪除</th></tr>
                         </thead>
                         <tbody id="pareto-tbody"></tbody>
                     </table>
                     <button onclick="addParetoRow()" class="enterprise-btn text-xs px-4 py-2 rounded">+ 新增項目</button>
                 </div>
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📈 工作表 B：柏拉圖圖表分析 (對應名稱: pareto_chart)</h2>
+            </div>
+
+            <!-- 4. 柏拉圖圖表 -->
+            <div id="tab-pareto-chart" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-indigo-600">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-indigo-700">📈 工作表 4：柏拉圖圖表分析 (pareto_chart)</h2>
                         <button onclick="exportSingleChart('paretoChart', '柏拉圖.png')" class="enterprise-btn text-xs px-3 py-1.5 rounded">📥 下載此圖 PNG</button>
                     </div>
-                    <div class="w-full h-80 bg-white p-2 border-2 border-black rounded"><canvas id="paretoChart"></canvas></div>
+                    <div class="w-full h-80 bg-white p-2 border-2 border-slate-800 rounded"><canvas id="paretoChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- 2. 魚骨圖 -->
-            <div id="tab-fishbone" class="tab-content hidden space-y-6">
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📋 工作表 A：魚骨圖表格輸入 (表-圖對應: fishbone_table ⇄ fishbone_chart)</h2>
+            <!-- 5. 魚骨圖表格 -->
+            <div id="tab-fishbone-table" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-amber-500">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-amber-700">📋 工作表 5：魚骨圖表格輸入 (fishbone_table)</h2>
                     </div>
                     <div>
-                        <label class="block text-xs font-black text-black mb-1">主要問題 (魚頭)</label>
+                        <label class="block text-xs font-black text-slate-800 mb-1">主要問題 (魚頭)</label>
                         <input type="text" id="fish-problem" class="w-full px-3 py-2 rounded text-sm mb-4" placeholder="例：CNC 加工尺寸不合格" oninput="triggerAutoSave(); renderFishbone();">
                         <div class="space-y-3" id="fish-categories-inputs"></div>
                     </div>
                 </div>
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📈 工作表 B：魚骨圖視覺化檢視 (對應名稱: fishbone_chart)</h2>
+            </div>
+
+            <!-- 6. 魚骨圖圖表 -->
+            <div id="tab-fishbone-chart" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-amber-600">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-amber-700">📈 工作表 6：魚骨圖視覺化分析 (fishbone_chart)</h2>
                         <button onclick="exportFishbonePNG()" class="enterprise-btn text-xs px-3 py-1.5 rounded">📥 下載魚骨圖 PNG</button>
                     </div>
-                    <div id="fishbone-container" class="w-full min-h-[350px] bg-white border-2 border-black rounded p-4 flex items-center justify-center"></div>
+                    <div id="fishbone-container" class="w-full min-h-[350px] bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-slate-800 rounded p-4 flex items-center justify-center"></div>
                 </div>
             </div>
 
-            <!-- 3. 管制圖 -->
-            <div id="tab-control" class="tab-content hidden space-y-6">
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📋 工作表 A：管制圖表格輸入 (表-圖對應: control_table ⇄ control_chart)</h2>
+            <!-- 7. 管制圖表格 -->
+            <div id="tab-control-table" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-emerald-500">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-emerald-700">📋 工作表 7：管制圖表格輸入 (control_table)</h2>
                         <button onclick="loadDemoData('control')" class="enterprise-btn text-xs px-3 py-1.5 rounded">載入範例資料</button>
                     </div>
-                    <table class="w-full border-2 border-black text-sm">
-                        <thead class="bg-zinc-200">
-                            <tr><th class="p-2 border-2 border-black">組別 (Subgroup)</th><th class="p-2 border-2 border-black">數值 (Value)</th><th class="w-10 border-2 border-black">刪除</th></tr>
+                    <table class="w-full border-2 border-slate-800 text-sm shadow">
+                        <thead class="bg-emerald-100 text-slate-900">
+                            <tr><th class="p-2 border-2 border-slate-800">組別 (Subgroup)</th><th class="p-2 border-2 border-slate-800">數值 (Value)</th><th class="w-10 border-2 border-slate-800">刪除</th></tr>
                         </thead>
                         <tbody id="control-tbody"></tbody>
                     </table>
                     <button onclick="addControlRow()" class="enterprise-btn text-xs px-4 py-2 rounded">+ 新增組別</button>
                 </div>
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📈 工作表 B：Xbar-R 管制圖表 (對應名稱: control_chart)</h2>
+            </div>
+
+            <!-- 8. 管制圖圖表 -->
+            <div id="tab-control-chart" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-emerald-600">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-emerald-700">📈 工作表 8：Xbar-R 管制圖表 (control_chart)</h2>
                         <button onclick="exportSingleChart('controlChart', '管制圖.png')" class="enterprise-btn text-xs px-3 py-1.5 rounded">📥 下載此圖 PNG</button>
                     </div>
-                    <div class="w-full h-80 bg-white p-2 border-2 border-black rounded"><canvas id="controlChart"></canvas></div>
+                    <div class="w-full h-80 bg-white p-2 border-2 border-slate-800 rounded"><canvas id="controlChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- 4. 直方圖 -->
-            <div id="tab-histogram" class="tab-content hidden space-y-6">
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📋 工作表 A：直方圖數據輸入 (表-圖對應: histogram_table ⇄ histogram_chart)</h2>
+            <!-- 9. 直方圖表格 -->
+            <div id="tab-histo-table" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-purple-500">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-purple-700">📋 工作表 9：直方圖數據表格輸入 (histo_table)</h2>
                         <button onclick="loadDemoData('histogram')" class="enterprise-btn text-xs px-3 py-1.5 rounded">載入範例資料</button>
                     </div>
                     <div>
-                        <label class="block text-xs font-black text-black mb-1">輸入原始數據 (用逗號或換行分隔)</label>
+                        <label class="block text-xs font-black text-slate-800 mb-1">輸入原始數據 (用逗號或換行分隔)</label>
                         <textarea id="histo-data-input" rows="6" class="w-full p-2 rounded text-sm" placeholder="10.2, 10.5, 9.8..." oninput="triggerAutoSave(); renderHistogram();"></textarea>
                     </div>
                 </div>
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📈 工作表 B：直方圖圖表分析 (對應名稱: histogram_chart)</h2>
+            </div>
+
+            <!-- 10. 直方圖圖表 -->
+            <div id="tab-histo-chart" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-purple-600">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-purple-700">📈 工作表 10：直方圖圖表分析 (histo_chart)</h2>
                         <button onclick="exportSingleChart('histoChart', '直方圖.png')" class="enterprise-btn text-xs px-3 py-1.5 rounded">📥 下載此圖 PNG</button>
                     </div>
-                    <div class="w-full h-80 bg-white p-2 border-2 border-black rounded"><canvas id="histoChart"></canvas></div>
+                    <div class="w-full h-80 bg-white p-2 border-2 border-slate-800 rounded"><canvas id="histoChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- 5. 散佈圖 -->
-            <div id="tab-scatter" class="tab-content hidden space-y-6">
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📋 工作表 A：散佈圖數據輸入 (表-圖對應: scatter_table ⇄ scatter_chart)</h2>
+            <!-- 11. 散佈圖表格 -->
+            <div id="tab-scatter-table" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-rose-500">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-rose-700">📋 工作表 11：散佈圖數據表格輸入 (scatter_table)</h2>
                         <button onclick="loadDemoData('scatter')" class="enterprise-btn text-xs px-3 py-1.5 rounded">載入範例資料</button>
                     </div>
-                    <table class="w-full border-2 border-black text-sm">
-                        <thead class="bg-zinc-200">
-                            <tr><th class="p-2 border-2 border-black">X 變數</th><th class="p-2 border-2 border-black">Y 變數</th><th class="w-10 border-2 border-black">刪除</th></tr>
+                    <table class="w-full border-2 border-slate-800 text-sm shadow">
+                        <thead class="bg-rose-100 text-slate-900">
+                            <tr><th class="p-2 border-2 border-slate-800">X 變數</th><th class="p-2 border-2 border-slate-800">Y 變數</th><th class="w-10 border-2 border-slate-800">刪除</th></tr>
                         </thead>
                         <tbody id="scatter-tbody"></tbody>
                     </table>
                     <button onclick="addScatterRow()" class="enterprise-btn text-xs px-4 py-2 rounded">+ 新增數據點</button>
                 </div>
-                <div class="enterprise-card p-6 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-black pb-3">
-                        <h2 class="text-lg font-black text-black">📈 工作表 B：散佈圖視覺化分析 (對應名稱: scatter_chart)</h2>
+            </div>
+
+            <!-- 12. 散佈圖圖表 -->
+            <div id="tab-scatter-chart" class="tab-content hidden space-y-6">
+                <div class="enterprise-card p-6 space-y-4 border-l-8 border-l-rose-600">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-3">
+                        <h2 class="text-lg font-black text-rose-700">📈 工作表 12：散佈圖視覺化分析 (scatter_chart)</h2>
                         <button onclick="exportSingleChart('scatterChart', '散佈圖.png')" class="enterprise-btn text-xs px-3 py-1.5 rounded">📥 下載此圖 PNG</button>
                     </div>
-                    <div class="w-full h-80 bg-white p-2 border-2 border-black rounded"><canvas id="scatterChart"></canvas></div>
+                    <div class="w-full h-80 bg-white p-2 border-2 border-slate-800 rounded"><canvas id="scatterChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- 6. 資料與匯出 -->
+            <!-- 資料與匯出 -->
             <div id="tab-data" class="tab-content hidden space-y-6">
-                <div class="enterprise-card p-6 space-y-6">
-                    <h2 class="text-lg font-black text-black border-b-2 border-black pb-2">📁 多工作表 Excel 管理與匯出</h2>
+                <div class="enterprise-card p-6 space-y-6 border-l-8 border-l-slate-700">
+                    <h2 class="text-lg font-black text-slate-900 border-b-2 border-slate-200 pb-2">📁 10+2 工作表 Excel 管理與批次匯出</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="p-4 border-2 border-black rounded-lg bg-zinc-50 space-y-3">
-                            <h3 class="font-black text-sm text-black">Excel 資料交換 (表-圖工作表分離)</h3>
-                            <p class="text-xs text-black">一鍵將所有表單與圖表對應數據匯出為標準企業多工作表 Excel 檔案。</p>
+                        <div class="p-4 border-2 border-slate-800 rounded-lg bg-amber-50 space-y-3 shadow">
+                            <h3 class="font-black text-sm text-slate-900">Excel 資料交換</h3>
+                            <p class="text-xs text-slate-700">一鍵將所有獨立的表單與圖表工作表匯出為標準企業多工作表 Excel 檔案。</p>
                             <div class="flex space-x-3 pt-2">
                                 <button onclick="exportExcel()" class="enterprise-btn text-xs px-4 py-2 rounded font-black">📥 匯出完整 Excel</button>
                                 <label class="enterprise-btn text-xs px-4 py-2 rounded font-black cursor-pointer inline-block text-center">
@@ -288,9 +315,9 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="p-4 border-2 border-black rounded-lg bg-zinc-50 space-y-3">
-                            <h3 class="font-black text-sm text-black">PNG 圖片批次匯出</h3>
-                            <p class="text-xs text-black">一次性將系統中產生的所有圖表下載為 PNG 圖片檔。</p>
+                        <div class="p-4 border-2 border-slate-800 rounded-lg bg-indigo-50 space-y-3 shadow">
+                            <h3 class="font-black text-sm text-slate-900">PNG 圖片批次匯出</h3>
+                            <p class="text-xs text-slate-700">一次性將系統中產生的所有圖表下載為 PNG 圖片檔。</p>
                             <div class="pt-2">
                                 <button onclick="exportAllPNG()" class="enterprise-btn text-xs px-4 py-2 rounded font-black">📸 一鍵匯出所有圖表 PNG</button>
                             </div>
@@ -397,10 +424,10 @@
                 const dot = document.getElementById('conn-dot');
                 const status = document.getElementById('conn-status');
                 if (snap.val() === true) {
-                    dot.className = "w-3 h-3 rounded-full bg-emerald-500 animate-pulse";
+                    dot.className = "w-3 h-3 rounded-full bg-emerald-400 animate-pulse";
                     status.textContent = "雲端資料庫已連線";
                 } else {
-                    dot.className = "w-3 h-3 rounded-full bg-red-500";
+                    dot.className = "w-3 h-3 rounded-full bg-rose-500";
                     status.textContent = "雲端連線中斷";
                 }
             });
@@ -409,10 +436,10 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.className = "tab-btn py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap";
+                btn.className = "tab-btn py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap";
             });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            event.currentTarget.className = "tab-btn tab-btn-active py-3 px-4 font-black text-sm border-b-4 border-transparent text-black whitespace-nowrap";
+            event.currentTarget.className = "tab-btn tab-btn-active py-3 px-3 font-black text-xs border-b-4 border-transparent text-slate-800 whitespace-nowrap";
             setTimeout(() => { updateAllCharts(); }, 50);
         }
 
@@ -422,7 +449,7 @@
             clearTimeout(autoSaveTimer);
             autoSaveTimer = setTimeout(() => {
                 gatherDataFromDOM();
-                const dataRef = database.ref('users/' + currentUser.uid + '/qcDataEnterprise');
+                const dataRef = database.ref('users/' + currentUser.uid + '/qcDataLivelyEnterprise');
                 const now = new Date().toLocaleString();
                 dataRef.set({ data: appData, lastSaved: now }).then(() => {
                     const timeEl = document.getElementById('last-saved-time');
@@ -430,12 +457,12 @@
                         timeEl.textContent = "已自動同步 (" + now + ")";
                     }
                 }).catch(err => { console.error('自動儲存失敗: ', err); });
-            }, 800); // 停止輸入 800ms 後自動同步到雲端
+            }, 800);
         }
 
         function loadDataFromFirebase() {
             if (!currentUser) return;
-            database.ref('users/' + currentUser.uid + '/qcDataEnterprise').once('value').then(snapshot => {
+            database.ref('users/' + currentUser.uid + '/qcDataLivelyEnterprise').once('value').then(snapshot => {
                 const val = snapshot.val();
                 if (val && val.data) {
                     appData = val.data;
@@ -455,7 +482,6 @@
         }
 
         function gatherDataFromDOM() {
-            // VSM
             const vsmRows = document.querySelectorAll('#vsm-tbody tr');
             appData.vsm = Array.from(vsmRows).map(row => ({
                 process: row.querySelector('.v-proc').value,
@@ -463,28 +489,23 @@
                 co: Number(row.querySelector('.v-co').value) || 0
             }));
 
-            // Pareto
             appData.pareto = Array.from(document.querySelectorAll('#pareto-tbody tr')).map(row => ({
                 item: row.querySelector('.p-item').value,
                 count: Number(row.querySelector('.p-count').value) || 0
             }));
 
-            // Fishbone
             appData.fishbone.problem = document.getElementById('fish-problem').value;
             document.querySelectorAll('.fish-cat-input').forEach(input => {
                 appData.fishbone.categories[input.dataset.cat] = input.value;
             });
 
-            // Control
             appData.control = Array.from(document.querySelectorAll('#control-tbody tr')).map(row => ({
                 subgroup: row.querySelector('.c-sub').value,
                 value: Number(row.querySelector('.c-val').value) || 0
             }));
 
-            // Histogram
             appData.histogram = document.getElementById('histo-data-input').value.split(/[\n,]/).map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
 
-            // Scatter
             appData.scatter = Array.from(document.querySelectorAll('#scatter-tbody tr')).map(row => ({
                 x: Number(row.querySelector('.s-x').value) || 0,
                 y: Number(row.querySelector('.s-y').value) || 0
@@ -492,38 +513,32 @@
         }
 
         function populateDOMFromData() {
-            // VSM
             const vTbody = document.getElementById('vsm-tbody');
             vTbody.innerHTML = '';
             appData.vsm.forEach(d => addVsmRow(d.process, d.ct, d.co));
 
-            // Pareto
             const pTbody = document.getElementById('pareto-tbody');
             pTbody.innerHTML = '';
             appData.pareto.forEach(d => addParetoRow(d.item, d.count));
 
-            // Fishbone
             document.getElementById('fish-problem').value = appData.fishbone.problem || '';
             const fishDiv = document.getElementById('fish-categories-inputs');
             fishDiv.innerHTML = '';
             for (let [cat, val] of Object.entries(appData.fishbone.categories)) {
                 fishDiv.innerHTML += `
                     <div>
-                        <label class="block text-xs font-black text-black mb-1">${cat}</label>
+                        <label class="block text-xs font-black text-slate-800 mb-1">${cat}</label>
                         <input type="text" data-cat="${cat}" class="fish-cat-input w-full px-3 py-2 rounded text-sm" value="${val}" oninput="triggerAutoSave(); renderFishbone();">
                     </div>
                 `;
             }
 
-            // Control
             const cTbody = document.getElementById('control-tbody');
             cTbody.innerHTML = '';
             appData.control.forEach(d => addControlRow(d.subgroup, d.value));
 
-            // Histogram
             document.getElementById('histo-data-input').value = appData.histogram.join(', ');
 
-            // Scatter
             const sTbody = document.getElementById('scatter-tbody');
             sTbody.innerHTML = '';
             appData.scatter.forEach(d => addScatterRow(d.x, d.y));
@@ -536,10 +551,10 @@
             const tbody = document.getElementById('vsm-tbody');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="p-1 border-2 border-black"><input type="text" class="v-proc w-full p-1 text-xs border-0 rounded-none" value="${proc}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black"><input type="number" class="v-ct w-full p-1 text-xs border-0 rounded-none" value="${ct}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black"><input type="number" class="v-co w-full p-1 text-xs border-0 rounded-none" value="${co}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-red-600 font-black text-base hover:scale-125 transition">&times;</button></td>
+                <td class="p-1 border-2 border-slate-800"><input type="text" class="v-proc w-full p-1 text-xs border-0 rounded-none" value="${proc}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800"><input type="number" class="v-ct w-full p-1 text-xs border-0 rounded-none" value="${ct}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800"><input type="number" class="v-co w-full p-1 text-xs border-0 rounded-none" value="${co}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800 text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-rose-600 font-black text-base hover:scale-125 transition">&times;</button></td>
             `;
             tbody.appendChild(tr);
             triggerAutoSave();
@@ -549,9 +564,9 @@
             const tbody = document.getElementById('pareto-tbody');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="p-1 border-2 border-black"><input type="text" class="p-item w-full p-1 text-sm border-0 rounded-none" value="${item}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black"><input type="number" class="p-count w-full p-1 text-sm border-0 rounded-none" value="${count}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-red-600 font-black text-base hover:scale-125 transition">&times;</button></td>
+                <td class="p-1 border-2 border-slate-800"><input type="text" class="p-item w-full p-1 text-sm border-0 rounded-none" value="${item}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800"><input type="number" class="p-count w-full p-1 text-sm border-0 rounded-none" value="${count}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800 text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-rose-600 font-black text-base hover:scale-125 transition">&times;</button></td>
             `;
             tbody.appendChild(tr);
             triggerAutoSave();
@@ -561,9 +576,9 @@
             const tbody = document.getElementById('control-tbody');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="p-1 border-2 border-black"><input type="text" class="c-sub w-full p-1 text-sm border-0 rounded-none" value="${sub}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black"><input type="number" class="c-val w-full p-1 text-sm border-0 rounded-none" value="${val}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-red-600 font-black text-base hover:scale-125 transition">&times;</button></td>
+                <td class="p-1 border-2 border-slate-800"><input type="text" class="c-sub w-full p-1 text-sm border-0 rounded-none" value="${sub}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800"><input type="number" class="c-val w-full p-1 text-sm border-0 rounded-none" value="${val}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800 text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-rose-600 font-black text-base hover:scale-125 transition">&times;</button></td>
             `;
             tbody.appendChild(tr);
             triggerAutoSave();
@@ -573,9 +588,9 @@
             const tbody = document.getElementById('scatter-tbody');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="p-1 border-2 border-black"><input type="number" class="s-x w-full p-1 text-sm border-0 rounded-none" value="${x}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black"><input type="number" class="s-y w-full p-1 text-sm border-0 rounded-none" value="${y}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-1 border-2 border-black text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-red-600 font-black text-base hover:scale-125 transition">&times;</button></td>
+                <td class="p-1 border-2 border-slate-800"><input type="number" class="s-x w-full p-1 text-sm border-0 rounded-none" value="${x}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800"><input type="number" class="s-y w-full p-1 text-sm border-0 rounded-none" value="${y}" oninput="triggerAutoSave(); updateAllCharts();"></td>
+                <td class="p-1 border-2 border-slate-800 text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-rose-600 font-black text-base hover:scale-125 transition">&times;</button></td>
             `;
             tbody.appendChild(tr);
             triggerAutoSave();
@@ -591,7 +606,6 @@
             renderFishbone();
         }
 
-        // 0. 價值流 VSM 繪製
         function renderVSM() {
             const container = document.getElementById('vsm-container');
             if (!container) return;
@@ -604,30 +618,30 @@
 
             let svgWidth = Math.max(800, steps.length * 150 + 100);
             let svg = `<svg viewBox="0 0 ${svgWidth} 380" class="w-full h-full max-h-[360px]">
-                <text x="20" y="30" font-size="14" font-weight="900" fill="#000000">Value Stream Mapping (VSM) - 企業生產價值流圖</text>
-                <line x1="20" y1="220" x2="${svgWidth - 20}" y2="220" stroke="#000000" stroke-width="3"/>
+                <text x="20" y="30" font-size="14" font-weight="900" fill="#1e293b">Value Stream Mapping (VSM) - 活力生產價值流圖</text>
+                <line x1="20" y1="220" x2="${svgWidth - 20}" y2="220" stroke="#3b82f6" stroke-width="3"/>
             `;
 
             let startX = 60;
             steps.forEach((s, idx) => {
                 let x = startX + idx * 160;
                 svg += `
-                    <rect x="${x}" y="70" width="120" height="90" rx="4" fill="#ffffff" stroke="#000000" stroke-width="3"/>
-                    <rect x="${x}" y="70" width="120" height="25" fill="#000000" rx="2"/>
+                    <rect x="${x}" y="70" width="120" height="90" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+                    <rect x="${x}" y="70" width="120" height="25" fill="#3b82f6" rx="4"/>
                     <text x="${x + 60}" y="87" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle">${s.process}</text>
-                    <text x="${x + 10}" y="115" fill="#000000" font-size="10" font-weight="900">C/T: ${s.ct} 秒</text>
-                    <text x="${x + 10}" y="135" fill="#000000" font-size="10" font-weight="900">C/O: ${s.co} 分</text>
+                    <text x="${x + 10}" y="115" fill="#1e293b" font-size="10" font-weight="900">C/T: ${s.ct} 秒</text>
+                    <text x="${x + 10}" y="135" fill="#1e293b" font-size="10" font-weight="900">C/O: ${s.co} 分</text>
                 `;
 
                 if (idx < steps.length - 1) {
-                    svg += `<polygon points="${x + 125},110 ${x + 155},110 ${x + 155},105 ${x + 165},115 ${x + 155},125 ${x + 155},120 ${x + 125},120" fill="#000000"/>`;
+                    svg += `<polygon points="${x + 125},110 ${x + 155},110 ${x + 155},105 ${x + 165},115 ${x + 155},125 ${x + 155},120 ${x + 125},120" fill="#f59e0b"/>`;
                 }
 
                 svg += `
-                    <line x1="${x}" y1="220" x2="${x}" y2="250" stroke="#000000" stroke-width="2"/>
-                    <line x1="${x}" y1="250" x2="${x + 60}" y2="250" stroke="#000000" stroke-width="2"/>
-                    <text x="${x + 30}" y="270" fill="#000000" font-size="10" font-weight="900" text-anchor="middle">PT:${s.ct}s</text>
-                    <line x1="${x + 60}" y1="250" x2="${x + 60}" y2="220" stroke="#000000" stroke-width="2"/>
+                    <line x1="${x}" y1="220" x2="${x}" y2="250" stroke="#ef4444" stroke-width="2"/>
+                    <line x1="${x}" y1="250" x2="${x + 60}" y2="250" stroke="#ef4444" stroke-width="2"/>
+                    <text x="${x + 30}" y="270" fill="#ef4444" font-size="10" font-weight="900" text-anchor="middle">PT:${s.ct}s</text>
+                    <line x1="${x + 60}" y1="250" x2="${x + 60}" y2="220" stroke="#ef4444" stroke-width="2"/>
                 `;
             });
 
@@ -659,7 +673,6 @@
             image.src = blobURL;
         }
 
-        // 1. 柏拉圖
         function renderPareto() {
             const ctx = document.getElementById('paretoChart');
             if (!ctx) return;
@@ -676,8 +689,8 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: '不良數', data: counts, backgroundColor: '#000000', yAxisID: 'y', order: 2 },
-                        { label: '累積百分比 (%)', data: cumPercent, type: 'line', borderColor: '#2563eb', backgroundColor: '#2563eb', yAxisID: 'y1', order: 1, tension: 0.1 }
+                        { label: '不良數', data: counts, backgroundColor: '#6366f1', yAxisID: 'y', order: 2 },
+                        { label: '累積百分比 (%)', data: cumPercent, type: 'line', borderColor: '#f43f5e', backgroundColor: '#f43f5e', yAxisID: 'y1', order: 1, tension: 0.1 }
                     ]
                 },
                 options: {
@@ -690,7 +703,6 @@
             });
         }
 
-        // 2. 魚骨圖
         function renderFishbone() {
             const container = document.getElementById('fishbone-container');
             if (!container) return;
@@ -698,9 +710,9 @@
             let cats = appData.fishbone.categories;
 
             let svg = `<svg viewBox="0 0 800 400" class="w-full h-full max-h-[350px]">
-                <line x1="50" y1="200" x2="700" y2="200" stroke="#000000" stroke-width="4"/>
-                <polygon points="700,190 730,200 700,210" fill="#000000"/>
-                <rect x="735" y="175" width="60" height="50" rx="4" fill="#000000"/>
+                <line x1="50" y1="200" x2="700" y2="200" stroke="#d97706" stroke-width="4"/>
+                <polygon points="700,190 730,200 700,210" fill="#d97706"/>
+                <rect x="735" y="175" width="60" height="50" rx="6" fill="#f59e0b"/>
                 <text x="765" y="205" fill="#ffffff" font-size="12" font-weight="900" text-anchor="middle">${prob}</text>
             `;
 
@@ -710,20 +722,20 @@
             topCats.forEach(([cat, val], idx) => {
                 let x = 180 + idx * 180;
                 svg += `
-                    <line x1="${x}" y1="200" x2="${x - 60}" y2="80" stroke="#000000" stroke-width="2.5"/>
-                    <text x="${x - 55}" y="70" fill="#000000" font-size="11" font-weight="900">${cat}</text>
-                    <line x1="${x - 45}" y1="110" x2="${x + 20}" y2="110" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4"/>
-                    <text x="${x - 45}" y="105" fill="#000000" font-size="10" font-weight="900">${val.split(',')[0] || ''}</text>
+                    <line x1="${x}" y1="200" x2="${x - 60}" y2="80" stroke="#4f46e5" stroke-width="2.5"/>
+                    <text x="${x - 55}" y="70" fill="#4f46e5" font-size="11" font-weight="900">${cat}</text>
+                    <line x1="${x - 45}" y1="110" x2="${x + 20}" y2="110" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"/>
+                    <text x="${x - 45}" y="105" fill="#1e293b" font-size="10" font-weight="900">${val.split(',')[0] || ''}</text>
                 `;
             });
 
             botCats.forEach(([cat, val], idx) => {
                 let x = 270 + idx * 180;
                 svg += `
-                    <line x1="${x}" y1="200" x2="${x - 60}" y2="320" stroke="#000000" stroke-width="2.5"/>
-                    <text x="${x - 55}" y="335" fill="#000000" font-size="11" font-weight="900">${cat}</text>
-                    <line x1="${x - 45}" y1="290" x2="${x + 20}" y2="290" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4"/>
-                    <text x="${x - 45}" y="285" fill="#000000" font-size="10" font-weight="900">${val.split(',')[0] || ''}</text>
+                    <line x1="${x}" y1="200" x2="${x - 60}" y2="320" stroke="#4f46e5" stroke-width="2.5"/>
+                    <text x="${x - 55}" y="335" fill="#4f46e5" font-size="11" font-weight="900">${cat}</text>
+                    <line x1="${x - 45}" y1="290" x2="${x + 20}" y2="290" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"/>
+                    <text x="${x - 45}" y="285" fill="#1e293b" font-size="10" font-weight="900">${val.split(',')[0] || ''}</text>
                 `;
             });
 
@@ -731,7 +743,6 @@
             container.innerHTML = svg;
         }
 
-        // 3. 管制圖
         function renderControl() {
             const ctx = document.getElementById('controlChart');
             if (!ctx) return;
@@ -747,17 +758,16 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: '數值', data: values, borderColor: '#000000', backgroundColor: '#000000', tension: 0.1 },
-                        { label: '平均線 (CL)', data: Array(values.length).fill(mean), borderColor: '#10b981', borderDash: [5, 5], pointRadius: 0 },
-                        { label: '上管制界限 (UCL)', data: Array(values.length).fill(ucl), borderColor: '#ef4444', borderDash: [2, 2], pointRadius: 0 },
-                        { label: '下管制界限 (LCL)', data: Array(values.length).fill(lcl), borderColor: '#ef4444', borderDash: [2, 2], pointRadius: 0 }
+                        { label: '數值', data: values, borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.1 },
+                        { label: '平均線 (CL)', data: Array(values.length).fill(mean), borderColor: '#3b82f6', borderDash: [5, 5], pointRadius: 0 },
+                        { label: '上管制界限 (UCL)', data: Array(values.length).fill(ucl), borderColor: '#f43f5e', borderDash: [2, 2], pointRadius: 0 },
+                        { label: '下管制界限 (LCL)', data: Array(values.length).fill(lcl), borderColor: '#f43f5e', borderDash: [2, 2], pointRadius: 0 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        // 4. 直方圖
         function renderHistogram() {
             const ctx = document.getElementById('histoChart');
             if (!ctx) return;
@@ -783,19 +793,18 @@
             if (charts.histo) charts.histo.destroy();
             charts.histo = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: labels, datasets: [{ label: '頻率', data: counts, backgroundColor: '#000000', barPercentage: 1.0, categoryPercentage: 1.0 }] },
+                data: { labels: labels, datasets: [{ label: '頻率', data: counts, backgroundColor: '#8b5cf6', barPercentage: 1.0, categoryPercentage: 1.0 }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        // 5. 散佈圖
         function renderScatter() {
             const ctx = document.getElementById('scatterChart');
             if (!ctx) return;
             if (charts.scatter) charts.scatter.destroy();
             charts.scatter = new Chart(ctx, {
                 type: 'scatter',
-                data: { datasets: [{ label: 'XY 變數對應', data: appData.scatter, backgroundColor: '#2563eb' }] },
+                data: { datasets: [{ label: 'XY 變數對應', data: appData.scatter, backgroundColor: '#f43f5e' }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
@@ -841,12 +850,11 @@
             setTimeout(() => exportSingleChart('scatterChart', '5_散佈圖.png'), 1500);
         }
 
-        // 嚴格依名稱對應表-圖關係，並分開不同工作表匯出 Excel
+        // 嚴格拆成 10+ 個獨立工作表 (表格與圖表完全分離)
         function exportExcel() {
             gatherDataFromDOM();
             const wb = XLSX.utils.book_new();
 
-            // 表-圖名稱嚴格對應與分離
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.vsm), "vsm_table");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 說明: "vsm_chart 對應價值流圖表渲染區" }]), "vsm_chart");
 
@@ -861,13 +869,13 @@
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.control), "control_table");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 說明: "control_chart 對應管制圖圖表渲染區" }]), "control_chart");
 
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.histogram.map(v => ({ 數據數值: v }))), "histogram_table");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 說明: "histogram_chart 對應直方圖圖表渲染區" }]), "histogram_chart");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.histogram.map(v => ({ 數據數值: v }))), "histo_table");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 說明: "histo_chart 對應直方圖圖表渲染區" }]), "histo_chart");
 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.scatter), "scatter_table");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 說明: "scatter_chart 對應散佈圖圖表渲染區" }]), "scatter_chart");
 
-            XLSX.writeFile(wb, "QC_VSM_Enterprise_MultiSheet.xlsx");
+            XLSX.writeFile(wb, "QC_VSM_Lively_Enterprise_10Sheets.xlsx");
         }
 
         function importExcel(event) {
@@ -879,7 +887,7 @@
                 if (workbook.Sheets["vsm_table"]) appData.vsm = XLSX.utils.sheet_to_json(workbook.Sheets["vsm_table"]);
                 if (workbook.Sheets["pareto_table"]) appData.pareto = XLSX.utils.sheet_to_json(workbook.Sheets["pareto_table"]);
                 if (workbook.Sheets["control_table"]) appData.control = XLSX.utils.sheet_to_json(workbook.Sheets["control_table"]);
-                if (workbook.Sheets["histogram_table"]) appData.histogram = XLSX.utils.sheet_to_json(workbook.Sheets["histogram_table"]).map(r => r["數據數值"]).filter(v => v !== undefined);
+                if (workbook.Sheets["histo_table"]) appData.histogram = XLSX.utils.sheet_to_json(workbook.Sheets["histo_table"]).map(r => r["數據數值"]).filter(v => v !== undefined);
                 if (workbook.Sheets["scatter_table"]) appData.scatter = XLSX.utils.sheet_to_json(workbook.Sheets["scatter_table"]);
                 
                 if (workbook.Sheets["fishbone_table"]) {
@@ -907,5 +915,3 @@
 </body>
 </html>
 ```eof
-
-Your updated enterprise commercial single-file application is ready! Feel free to download or integrate the code. Let me know if you need any additional features or adjustments.
