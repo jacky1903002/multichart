@@ -227,7 +227,9 @@
                         <h2 class="text-xl font-black text-indigo-700">📈 工作表 4：柏拉圖圖表分析 (pareto_chart)</h2>
                         <button onclick="exportSingleChart('paretoChart', '柏拉圖.png')" class="master-btn text-xs px-4 py-2 rounded-lg font-black">📥 下載滿版圖表 PNG</button>
                     </div>
-                    <div class="w-full flex-1 min-h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="paretoChart"></canvas></div>
+                    <div class="w-full h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative">
+                        <canvas id="paretoChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -318,8 +320,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-1">
-                        <div class="xl:col-span-3 w-full min-h-[420px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative flex flex-col">
-                            <canvas id="controlChart" class="flex-1"></canvas>
+                        <div class="xl:col-span-3 w-full h-[450px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative">
+                            <canvas id="controlChart"></canvas>
                         </div>
 
                         <div id="cpk-sidebar-panel" class="p-5 bg-emerald-50 border-3 border-slate-900 rounded-xl shadow-lg flex flex-col justify-between space-y-4">
@@ -373,7 +375,7 @@
                         <h2 class="text-xl font-black text-purple-700">📈 工作表 10：直方圖常態分配分析 (histo_chart)</h2>
                         <button onclick="exportSingleChart('histoChart', '直方圖.png')" class="master-btn text-xs px-4 py-2 rounded-lg font-black">📥 下載滿版圖表 PNG</button>
                     </div>
-                    <div class="w-full flex-1 min-h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="histoChart"></canvas></div>
+                    <div class="w-full h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="histoChart"></canvas></div>
                 </div>
             </div>
 
@@ -403,7 +405,7 @@
                         <h2 class="text-xl font-black text-rose-700">📈 工作表 12：散佈圖相關性分析 (scatter_chart)</h2>
                         <button onclick="exportSingleChart('scatterChart', '散佈圖.png')" class="master-btn text-xs px-4 py-2 rounded-lg font-black">📥 下載滿版圖表 PNG</button>
                     </div>
-                    <div class="w-full flex-1 min-h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="scatterChart"></canvas></div>
+                    <div class="w-full h-[500px] bg-white p-4 border-3 border-slate-900 rounded-xl shadow-inner relative"><canvas id="scatterChart"></canvas></div>
                 </div>
             </div>
 
@@ -597,7 +599,7 @@
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             event.currentTarget.className = "tab-btn tab-btn-active py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap";
             
-            // 延遲觸發圖表尺寸更新與重新渲染，徹底解決分頁切換時圖表空白的問題
+            // 延遲觸發圖表尺寸更新與重新渲染
             setTimeout(() => {
                 updateAllCharts();
                 Object.values(charts).forEach(c => {
@@ -889,18 +891,14 @@
             let cumSum = 0;
             let rawCumPercent = counts.map(c => { cumSum += c; return Number(((cumSum / total) * 100).toFixed(1)); });
 
-            let chartLabels = ["", ...labels];
-            let chartCumPercent = [rawCumPercent[0], ...rawCumPercent];
-            let chartCounts = [null, ...counts];
-
             if (charts.pareto) charts.pareto.destroy();
             charts.pareto = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: chartLabels,
+                    labels: labels,
                     datasets: [
-                        { label: '不良數', data: chartCounts, backgroundColor: '#2563EB', yAxisID: 'y', order: 2, barPercentage: 0.9, categoryPercentage: 0.9 },
-                        { label: '累積百分比 (%)', data: chartCumPercent, type: 'line', borderColor: '#EF4444', backgroundColor: '#EF4444', yAxisID: 'y1', order: 1, tension: 0.1, pointRadius: 4 }
+                        { label: '不良數', data: counts, backgroundColor: '#2563EB', yAxisID: 'y', order: 2, barPercentage: 0.9, categoryPercentage: 0.9 },
+                        { label: '累積百分比 (%)', data: rawCumPercent, type: 'line', borderColor: '#EF4444', backgroundColor: '#EF4444', yAxisID: 'y1', order: 1, tension: 0.1, pointRadius: 4 }
                     ]
                 },
                 options: {
@@ -1221,7 +1219,10 @@
             reader.readAsArrayBuffer(file);
         }
 
-        window.onload = () => { populateDOMFromData(); };
+        window.onload = () => { 
+            populateDOMFromData(); 
+            updateAllCharts(); // 確保初次載入時圖表立即渲染
+        };
     </script>
 </body>
 </html>
