@@ -263,11 +263,11 @@
             <div id="tab-control-table" class="tab-content hidden flex-1 flex flex-col space-y-4">
                 <div class="master-card p-6 flex-1 flex flex-col space-y-4 border-l-8 border-l-emerald-600">
                     <div class="flex justify-between items-center border-b-4 border-slate-900 pb-3">
-                        <h2 class="text-xl font-black text-emerald-700">📋 工作表 7：管制圖與規格界限設定 (control_table)</h2>
+                        <h2 class="text-xl font-black text-emerald-700">📋 工作表 7：管制圖與規格/管制界限設定 (control_table)</h2>
                         <button onclick="loadDemoData('control')" class="master-btn text-xs px-4 py-2 rounded-lg font-black">載入範例資料</button>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-emerald-50 border-3 border-slate-900 rounded-xl shadow-inner">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-emerald-50 border-3 border-slate-900 rounded-xl shadow-inner">
                         <div>
                             <label class="block text-xs font-black text-slate-800 mb-1">上規格界限 (USL)</label>
                             <input type="number" id="control-usl" step="0.001" class="w-full px-3 py-2 rounded text-sm" value="10.15" oninput="triggerAutoSave(); updateAllCharts();">
@@ -276,12 +276,22 @@
                             <label class="block text-xs font-black text-slate-800 mb-1">下規格界限 (LSL)</label>
                             <input type="number" id="control-lsl" step="0.001" class="w-full px-3 py-2 rounded text-sm" value="9.85" oninput="triggerAutoSave(); updateAllCharts();">
                         </div>
-                        <div class="flex items-end space-x-4">
-                            <label class="flex items-center space-x-2 cursor-pointer pt-6">
-                                <input type="checkbox" id="show-spec-lines" checked class="w-5 h-5 accent-emerald-600" onchange="triggerAutoSave(); updateAllCharts();">
-                                <span class="text-sm font-black text-slate-900">顯示 USL / LSL 規格紅線</span>
-                            </label>
+                        <div>
+                            <label class="block text-xs font-black text-slate-800 mb-1">上管制界限 (UCL)</label>
+                            <input type="number" id="control-ucl" step="0.001" class="w-full px-3 py-2 rounded text-sm" value="10.08" oninput="triggerAutoSave(); updateAllCharts();">
                         </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-800 mb-1">中心線 (CL)</label>
+                            <input type="number" id="control-cl" step="0.001" class="w-full px-3 py-2 rounded text-sm" value="10.01" oninput="triggerAutoSave(); updateAllCharts();">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-800 mb-1">下管制界限 (LCL)</label>
+                            <input type="number" id="control-lcl" step="0.001" class="w-full px-3 py-2 rounded text-sm" value="9.94" oninput="triggerAutoSave(); updateAllCharts();">
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 px-1">
+                        <input type="checkbox" id="show-spec-lines" checked class="w-5 h-5 accent-emerald-600" onchange="triggerAutoSave(); updateAllCharts();">
+                        <span class="text-sm font-black text-slate-900">顯示 USL / LSL 規格紅線</span>
                     </div>
 
                     <div class="overflow-x-auto flex-1">
@@ -290,9 +300,6 @@
                                 <tr>
                                     <th class="p-3 border-2 border-slate-900">組別 (Subgroup)</th>
                                     <th class="p-3 border-2 border-slate-900">量測數值 (Value)</th>
-                                    <th class="p-3 border-2 border-slate-900">中心線 (CL)</th>
-                                    <th class="p-3 border-2 border-slate-900">上管制 (UCL)</th>
-                                    <th class="p-3 border-2 border-slate-900">下管制 (LCL)</th>
                                     <th class="w-16 border-2 border-slate-900">刪除</th>
                                 </tr>
                             </thead>
@@ -510,16 +517,11 @@
                 { process: "CMM 檢驗", ct: 25, co: 10 }
             ],
             pareto: [
-                { item: "問題5", count: 90 },
-                { item: "問題4", count: 60 },
-                { item: "問題2", count: 35 },
-                { item: "問題1", count: 20 },
-                { item: "問題8", count: 20 },
-                { item: "問題3", count: 12 },
-                { item: "問題6", count: 12 },
-                { item: "問題7", count: 8 },
-                { item: "問題9", count: 2 },
-                { item: "問題10", count: 2 }
+                { item: "尺寸超差", count: 45 },
+                { item: "表面刮傷", count: 25 },
+                { item: "毛邊過大", count: 15 },
+                { item: "孔徑偏心", count: 10 },
+                { item: "其他", count: 5 }
             ],
             fishbone: {
                 problem: "加工尺寸不穩定",
@@ -534,16 +536,19 @@
             controlConfig: {
                 usl: 10.15,
                 lsl: 9.85,
+                ucl: 10.08,
+                cl: 10.01,
+                lcl: 9.94,
                 showSpec: true,
                 showCpkPanel: true
             },
             control: [
-                { subgroup: "1", value: 10.02, cl: 10.01, ucl: 10.08, lcl: 9.94 },
-                { subgroup: "2", value: 9.98, cl: 10.01, ucl: 10.08, lcl: 9.94 },
-                { subgroup: "3", value: 10.05, cl: 10.01, ucl: 10.08, lcl: 9.94 },
-                { subgroup: "4", value: 9.95, cl: 10.01, ucl: 10.08, lcl: 9.94 },
-                { subgroup: "5", value: 10.01, cl: 10.01, ucl: 10.08, lcl: 9.94 },
-                { subgroup: "6", value: 10.03, cl: 10.01, ucl: 10.08, lcl: 9.94 }
+                { subgroup: "1", value: 10.02 },
+                { subgroup: "2", value: 9.98 },
+                { subgroup: "3", value: 10.05 },
+                { subgroup: "4", value: 9.95 },
+                { subgroup: "5", value: 10.01 },
+                { subgroup: "6", value: 10.03 }
             ],
             histogram: [9.95, 9.98, 10.01, 10.02, 10.00, 9.99, 10.03, 10.04, 9.97, 10.01, 10.02, 10.05, 9.96, 10.00],
             scatter: [
@@ -631,7 +636,7 @@
                 if (val && val.data) {
                     appData = { ...appData, ...val.data };
                     if (!appData.controlConfig) {
-                        appData.controlConfig = { usl: 10.15, lsl: 9.85, showSpec: true, showCpkPanel: true };
+                        appData.controlConfig = { usl: 10.15, lsl: 9.85, ucl: 10.08, cl: 10.01, lcl: 9.94, showSpec: true, showCpkPanel: true };
                     }
                     if (val.lastSaved) {
                         document.getElementById('last-saved-time').textContent = "已同步 (" + val.lastSaved + ")";
@@ -650,7 +655,7 @@
 
         function gatherDataFromDOM() {
             if (!appData.controlConfig) {
-                appData.controlConfig = { usl: 10.15, lsl: 9.85, showSpec: true, showCpkPanel: true };
+                appData.controlConfig = { usl: 10.15, lsl: 9.85, ucl: 10.08, cl: 10.01, lcl: 9.94, showSpec: true, showCpkPanel: true };
             }
 
             const vsmRows = document.querySelectorAll('#vsm-tbody tr');
@@ -672,15 +677,15 @@
 
             appData.controlConfig.usl = Number(document.getElementById('control-usl').value) || 10.15;
             appData.controlConfig.lsl = Number(document.getElementById('control-lsl').value) || 9.85;
+            appData.controlConfig.ucl = Number(document.getElementById('control-ucl').value) || 10.08;
+            appData.controlConfig.cl = Number(document.getElementById('control-cl').value) || 10.01;
+            appData.controlConfig.lcl = Number(document.getElementById('control-lcl').value) || 9.94;
             appData.controlConfig.showSpec = document.getElementById('show-spec-lines').checked;
             appData.controlConfig.showCpkPanel = document.getElementById('show-cpk-panel').checked;
 
             appData.control = Array.from(document.querySelectorAll('#control-tbody tr')).map(row => ({
                 subgroup: row.querySelector('.c-sub').value,
-                value: Number(row.querySelector('.c-val').value) || 0,
-                cl: Number(row.querySelector('.c-cl').value) || 0,
-                ucl: Number(row.querySelector('.c-ucl').value) || 0,
-                lcl: Number(row.querySelector('.c-lcl').value) || 0
+                value: Number(row.querySelector('.c-val').value) || 0
             }));
 
             appData.histogram = document.getElementById('histo-data-input').value.split(/[\n,]/).map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
@@ -693,7 +698,7 @@
 
         function populateDOMFromData() {
             if (!appData.controlConfig) {
-                appData.controlConfig = { usl: 10.15, lsl: 9.85, showSpec: true, showCpkPanel: true };
+                appData.controlConfig = { usl: 10.15, lsl: 9.85, ucl: 10.08, cl: 10.01, lcl: 9.94, showSpec: true, showCpkPanel: true };
             }
 
             const vTbody = document.getElementById('vsm-tbody');
@@ -716,13 +721,16 @@
 
             document.getElementById('control-usl').value = appData.controlConfig.usl ?? 10.15;
             document.getElementById('control-lsl').value = appData.controlConfig.lsl ?? 9.85;
+            document.getElementById('control-ucl').value = appData.controlConfig.ucl ?? 10.08;
+            document.getElementById('control-cl').value = appData.controlConfig.cl ?? 10.01;
+            document.getElementById('control-lcl').value = appData.controlConfig.lcl ?? 9.94;
             document.getElementById('show-spec-lines').checked = appData.controlConfig.showSpec ?? true;
             document.getElementById('show-cpk-panel').checked = appData.controlConfig.showCpkPanel ?? true;
             toggleCpkPanel();
 
             const cTbody = document.getElementById('control-tbody');
             cTbody.innerHTML = '';
-            appData.control.forEach(d => addControlRow(d.subgroup, d.value, d.cl, d.ucl, d.lcl));
+            appData.control.forEach(d => addControlRow(d.subgroup, d.value));
 
             document.getElementById('histo-data-input').value = appData.histogram.join(', ');
 
@@ -777,15 +785,12 @@
             triggerAutoSave();
         }
 
-        function addControlRow(sub = '', val = '', cl = '', ucl = '', lcl = '') {
+        function addControlRow(sub = '', val = '') {
             const tbody = document.getElementById('control-tbody');
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="p-2 border-2 border-slate-900"><input type="text" class="c-sub w-full p-2 text-base border-0 rounded-none" value="${sub}" oninput="triggerAutoSave(); updateAllCharts();"></td>
                 <td class="p-2 border-2 border-slate-900"><input type="number" class="c-val w-full p-2 text-base border-0 rounded-none" value="${val}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-2 border-2 border-slate-900"><input type="number" class="c-cl w-full p-2 text-base border-0 rounded-none" value="${cl}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-2 border-2 border-slate-900"><input type="number" class="c-ucl w-full p-2 text-base border-0 rounded-none" value="${ucl}" oninput="triggerAutoSave(); updateAllCharts();"></td>
-                <td class="p-2 border-2 border-slate-900"><input type="number" class="c-lcl w-full p-2 text-base border-0 rounded-none" value="${lcl}" oninput="triggerAutoSave(); updateAllCharts();"></td>
                 <td class="p-2 border-2 border-slate-900 text-center"><button onclick="this.closest('tr').remove(); triggerAutoSave(); updateAllCharts();" class="text-rose-600 font-black text-xl hover:scale-125 transition">&times;</button></td>
             `;
             tbody.appendChild(tr);
@@ -904,7 +909,7 @@
             let cumSum = 0;
             let rawCumPercent = counts.map(c => { cumSum += c; return Number(((cumSum / total) * 100).toFixed(1)); });
 
-            // 精確對齊：使用前端補空標籤與陣列對齊，使折線起點完美落在第一個直條的右上角
+            // 標準柏拉圖：直條無間距 (barPercentage: 1.0, categoryPercentage: 1.0)，折線起點對齊第一個直條右上角
             let chartLabels = ['', ...labels];
             let chartCounts = [null, ...counts];
             let chartCumPercent = [rawCumPercent[0], ...rawCumPercent];
@@ -915,7 +920,7 @@
                 data: {
                     labels: chartLabels,
                     datasets: [
-                        { label: '發生次數', data: chartCounts, backgroundColor: '#2563EB', yAxisID: 'y', order: 2, barPercentage: 0.9, categoryPercentage: 0.9 },
+                        { label: '發生次數', data: chartCounts, backgroundColor: '#3B82F6', borderColor: '#0F172A', borderWidth: 1.5, yAxisID: 'y', order: 2, barPercentage: 1.0, categoryPercentage: 1.0 },
                         { label: '累加機率 (%)', data: chartCumPercent, type: 'line', borderColor: '#EF4444', backgroundColor: '#EF4444', yAxisID: 'y1', order: 1, tension: 0.1, pointRadius: 4 }
                     ]
                 },
@@ -982,9 +987,6 @@
             if (!ctx) return;
             let labels = appData.control.map(d => d.subgroup);
             let values = appData.control.map(d => d.value);
-            let cls = appData.control.map(d => d.cl);
-            let ucls = appData.control.map(d => d.ucl);
-            let lcls = appData.control.map(d => d.lcl);
 
             let mean = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
             let variance = values.length > 1 ? values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length - 1) : 0.001;
@@ -992,6 +994,9 @@
 
             let usl = appData.controlConfig?.usl ?? 10.15;
             let lsl = appData.controlConfig?.lsl ?? 9.85;
+            let globalCL = appData.controlConfig?.cl ?? 10.01;
+            let globalUCL = appData.controlConfig?.ucl ?? 10.08;
+            let globalLCL = appData.controlConfig?.lcl ?? 9.94;
             let showSpec = appData.controlConfig?.showSpec ?? true;
 
             let cp = Number(((usl - lsl) / (6 * std)).toFixed(2));
@@ -1003,7 +1008,7 @@
             document.getElementById('stat-std').textContent = std.toFixed(3);
 
             let aiText = "";
-            let outOfControl = values.some((v, i) => v > ucls[i] || v < lcls[i]);
+            let outOfControl = values.some((v) => v > globalUCL || v < globalLCL);
             let outOfSpec = values.some(v => v > usl || v < lsl);
 
             if (outOfControl) {
@@ -1019,9 +1024,9 @@
 
             let datasets = [
                 { label: '量測數值', data: values, borderColor: '#2563EB', backgroundColor: '#2563EB', tension: 0.1, order: 1 },
-                { label: '中心線 (CL)', data: cls, borderColor: '#10B981', borderDash: [5, 5], pointRadius: 0, order: 2 },
-                { label: '上管制 (UCL)', data: ucls, borderColor: '#EF4444', borderDash: [2, 2], pointRadius: 0, order: 3 },
-                { label: '下管制 (LCL)', data: lcls, borderColor: '#EF4444', borderDash: [2, 2], pointRadius: 0, order: 4 }
+                { label: '中心線 (CL)', data: Array(values.length).fill(globalCL), borderColor: '#10B981', borderDash: [5, 5], pointRadius: 0, order: 2 },
+                { label: '上管制 (UCL)', data: Array(values.length).fill(globalUCL), borderColor: '#EF4444', borderDash: [2, 2], pointRadius: 0, order: 3 },
+                { label: '下管制 (LCL)', data: Array(values.length).fill(globalLCL), borderColor: '#EF4444', borderDash: [2, 2], pointRadius: 0, order: 4 }
             ];
 
             if (showSpec) {
