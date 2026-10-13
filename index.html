@@ -907,29 +907,61 @@
             let counts = sorted.map(d => d.count);
             let total = counts.reduce((a, b) => a + b, 0) || 1;
             let cumSum = 0;
-            let rawCumPercent = counts.map(c => { cumSum += c; return Number(((cumSum / total) * 100).toFixed(1)); });
-
-            // 標準柏拉圖：直條無間距 (barPercentage: 1.0, categoryPercentage: 1.0)，折線起點對齊第一個直條右上角
-            let chartLabels = ['', ...labels];
-            let chartCounts = [null, ...counts];
-            let chartCumPercent = [rawCumPercent[0], ...rawCumPercent];
+            let cumPercent = counts.map(c => { 
+                cumSum += c; 
+                return Number(((cumSum / total) * 100).toFixed(1)); 
+            });
 
             if (charts.pareto) charts.pareto.destroy();
             charts.pareto = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: chartLabels,
+                    labels: labels,
                     datasets: [
-                        { label: '發生次數', data: chartCounts, backgroundColor: '#3B82F6', borderColor: '#0F172A', borderWidth: 1.5, yAxisID: 'y', order: 2, barPercentage: 1.0, categoryPercentage: 1.0 },
-                        { label: '累加機率 (%)', data: chartCumPercent, type: 'line', borderColor: '#EF4444', backgroundColor: '#EF4444', yAxisID: 'y1', order: 1, tension: 0.1, pointRadius: 4 }
+                        { 
+                            label: '累加機率 (%)', 
+                            data: cumPercent, 
+                            type: 'line', 
+                            borderColor: '#EF4444', 
+                            backgroundColor: '#EF4444', 
+                            yAxisID: 'y1', 
+                            order: 1, 
+                            tension: 0, 
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        { 
+                            label: '發生次數', 
+                            data: counts, 
+                            backgroundColor: '#3B82F6', 
+                            borderColor: '#0F172A', 
+                            borderWidth: 1.5, 
+                            yAxisID: 'y', 
+                            order: 2, 
+                            barPercentage: 1.0, 
+                            categoryPercentage: 1.0 
+                        }
                     ]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true, 
+                    maintainAspectRatio: false,
                     scales: {
-                        x: { grid: { offset: false } },
-                        y: { beginAtZero: true, position: 'left', title: { display: true, text: '發生次數' } },
-                        y1: { beginAtZero: true, max: 100, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '佔發生率 %' } }
+                        x: { 
+                            grid: { offset: false } 
+                        },
+                        y: { 
+                            beginAtZero: true, 
+                            position: 'left', 
+                            title: { display: true, text: '發生次數' } 
+                        },
+                        y1: { 
+                            beginAtZero: true, 
+                            max: 100, 
+                            position: 'right', 
+                            grid: { drawOnChartArea: false }, 
+                            title: { display: true, text: '佔發生率 %' } 
+                        }
                     }
                 }
             });
