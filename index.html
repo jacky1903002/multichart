@@ -196,7 +196,7 @@
                 </div>
             </div>
 
-            <!-- 03. 柏拉圖表格 (含自動計算累計次數%) -->
+            <!-- 03. 柏拉圖表格 -->
             <div id="tab-pareto-table" class="tab-content hidden flex-1 flex flex-col space-y-4">
                 <div class="master-card p-6 flex-1 flex flex-col space-y-4 border-l-8 border-l-indigo-600">
                     <div class="flex justify-between items-center border-b-4 border-slate-900 pb-3">
@@ -220,7 +220,7 @@
                 </div>
             </div>
 
-            <!-- 04. 柏拉圖圖表 (折線起點對齊第一直條右上角) -->
+            <!-- 04. 柏拉圖圖表 -->
             <div id="tab-pareto-chart" class="tab-content hidden flex-1 flex flex-col space-y-4">
                 <div class="master-card p-6 flex-1 flex flex-col space-y-4 border-l-8 border-l-indigo-700">
                     <div class="flex justify-between items-center border-b-4 border-slate-900 pb-3">
@@ -596,7 +596,14 @@
             });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             event.currentTarget.className = "tab-btn tab-btn-active py-4 px-5 font-black border-b-6 border-transparent whitespace-nowrap";
-            setTimeout(() => { updateAllCharts(); }, 50);
+            
+            // 延遲觸發圖表尺寸更新與重新渲染，徹底解決分頁切換時圖表空白的問題
+            setTimeout(() => {
+                updateAllCharts();
+                Object.values(charts).forEach(c => {
+                    if (c && typeof c.resize === 'function') c.resize();
+                });
+            }, 100);
         }
 
         function triggerAutoSave() {
@@ -880,14 +887,8 @@
             let counts = sorted.map(d => d.count);
             let total = counts.reduce((a, b) => a + b, 0) || 1;
             let cumSum = 0;
-            
-            // 計算累積百分比
             let rawCumPercent = counts.map(c => { cumSum += c; return Number(((cumSum / total) * 100).toFixed(1)); });
 
-            // 為了讓累積折線圖的起點從「第一個直條的右上角那一點」開始畫：
-            // 我們在陣列最前方插入一個虛擬點（其數值等於第一個點的百分比，對應分類軸的中心或左緣）
-            // 在 Chart.js 中，若使用 category 軸，若要在第一根柱子右上角，我們可以在 labels 陣列最前方加一個空字串 ""，
-            // 並在 dataset.data 最前方補上第一個點的值，讓線條從第一個直條頂部右側延伸。
             let chartLabels = ["", ...labels];
             let chartCumPercent = [rawCumPercent[0], ...rawCumPercent];
             let chartCounts = [null, ...counts];
