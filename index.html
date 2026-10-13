@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>品管與精實生產圖表生成系統 - QC & VSM Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (Excel 匯入匯出) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Firebase App & Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- 登入畫面 (未登入時顯示) -->
+    <div id="auth-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-slate-900">品管與精實生產圖表系統</h1>
+                <p class="text-sm text-slate-500 mt-1">請登入您的 Firebase 帳號以存取數據</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">電子郵件</label>
+                    <input type="email" id="login-email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="name@company.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">密碼</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
+                </div>
+                <div id="login-error" class="text-red-500 text-sm hidden"></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">登入系統</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 主應用程式介面 (登入後顯示) -->
+    <div id="app-screen" class="hidden flex-1 flex flex-col">
+        <!-- 頂部導覽列 -->
+        <header class="bg-slate-900 text-white shadow px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-bold tracking-wider">📊 QC & VSM 協同系統</h1>
+                <div class="flex items-center space-x-2 text-xs bg-slate-800 px-3 py-1.5 rounded-full">
+                    <span id="conn-dot" class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                    <span id="conn-status" class="text-slate-300">連線檢查中...</span>
+                </div>
+                <div class="text-xs text-slate-400 hidden sm:block">
+                    上次儲存: <span id="last-saved-time" class="text-slate-200">尚未儲存</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="user-email-display" class="text-sm text-slate-300"></span>
+                <button id="logout-btn" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition">登出</button>
+            </div>
+        </header>
+
+        <!-- 功能頁籤 -->
+        <nav class="bg-white border-b px-6 flex space-x-2 overflow-x-auto shadow-sm">
+            <button onclick="switchTab('vsm')" class="tab-btn py-3 px-4 font-medium text-sm border-b-2 border-blue-600 text-blue-600 whitespace-nowrap">0. 價值流(VSM)</button>
+            <button onclick="switchTab('pareto')" class="tab-btn py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">1. 柏拉圖</button>
+            <button onclick="switchTab('fishbone')" class="tab-btn py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">2. 魚骨圖</button>
+            <button onclick="switchTab('control')" class="tab-btn py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">3. 管制圖</button>
+            <button onclick="switchTab('histogram')" class="tab-btn py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">4. 直方圖</button>
+            <button onclick="switchTab('scatter')" class="tab-btn py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">5. 散佈圖</button>
+            <button onclick="switchTab('data')" class="tab-btn py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">📁 資料與匯出</button>
+        </nav>
+
+        <!-- 內容主體 -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+            <!-- 0. 價值流 VSM -->
+            <div id="tab-vsm" class="tab-content space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold">價值流表格輸入 (Value Stream Mapping, VSM)</h2>
+                        <div class="space-x-2">
+                            <button onclick="loadDemoData('vsm')" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded">載入範例</button>
+                            <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded">儲存至資料庫</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-1 space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">製程工序表格</label>
+                                <table class="w-full border text-xs">
+                                    <thead class="bg-slate-100">
+                                        <tr><th class="p-1.5 border">製程名稱</th><th class="p-1.5 border">C/T (秒)</th><th class="p-1.5 border">C/O (分)</th><th class="w-8"></th></tr>
+                                    </thead>
+                                    <tbody id="vsm-tbody"></tbody>
+                                </table>
+                                <button onclick="addVsmRow()" class="mt-2 text-xs text-blue-600 hover:underline">+ 新增工序</button>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded border text-xs space-y-1">
+                                <div class="font-semibold text-slate-700">生產指標摘要</div>
+                                <div>總加工週期時間 (PT): <span id="vsm-pt" class="font-bold text-blue-600">0</span> 秒</div>
+                                <div>生產置放庫存 (Lead Time 估算): <span id="vsm-lt" class="font-bold text-emerald-600">0</span> 秒</div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 bg-slate-50 p-4 rounded-lg border flex flex-col items-center justify-center relative overflow-x-auto">
+                            <div class="w-full flex justify-end mb-2">
+                                <button onclick="exportVSMPNG()" class="text-xs bg-white border px-3 py-1 rounded shadow-sm hover:bg-slate-100">📥 下載價值流圖 PNG</button>
+                            </div>
+                            <div id="vsm-container" class="w-full min-h-[380px] bg-white border rounded p-4 flex items-center justify-center">
+                                <!-- VSM SVG 渲染區 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. 柏拉圖 -->
+            <div id="tab-pareto" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold">柏拉圖表格輸入 (Pareto Chart)</h2>
+                        <div class="space-x-2">
+                            <button onclick="loadDemoData('pareto')" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded">載入範例</button>
+                            <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded">儲存至資料庫</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1">
+                            <table id="pareto-input-table" class="w-full border text-sm">
+                                <thead class="bg-slate-100">
+                                    <tr><th class="p-2 border">不良項目</th><th class="p-2 border">次數</th><th class="w-10"></th></tr>
+                                </thead>
+                                <tbody id="pareto-tbody"></tbody>
+                            </table>
+                            <button onclick="addParetoRow()" class="mt-2 text-sm text-blue-600 hover:underline">+ 新增項目</button>
+                        </div>
+                        <div class="md:col-span-2 bg-slate-50 p-4 rounded-lg border flex flex-col items-center justify-center relative">
+                            <div class="w-full flex justify-end mb-2">
+                                <button onclick="exportSingleChart('paretoChart', '柏拉圖.png')" class="text-xs bg-white border px-3 py-1 rounded shadow-sm hover:bg-slate-100">📥 下載此圖 PNG</button>
+                            </div>
+                            <div class="w-full h-80"><canvas id="paretoChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 魚骨圖 -->
+            <div id="tab-fishbone" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold">魚骨圖表格輸入 (Ishikawa Diagram - 4M1E)</h2>
+                        <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded">儲存至資料庫</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">主要問題 (魚頭)</label>
+                            <input type="text" id="fish-problem" class="w-full px-3 py-2 border rounded text-sm mb-4" placeholder="例：CNC 加工尺寸不合格" oninput="renderFishbone()">
+                            
+                            <div class="space-y-3" id="fish-categories-inputs"></div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border flex flex-col items-center justify-center relative overflow-x-auto">
+                            <div class="w-full flex justify-end mb-2">
+                                <button onclick="exportFishbonePNG()" class="text-xs bg-white border px-3 py-1 rounded shadow-sm hover:bg-slate-100">📥 下載魚骨圖 PNG</button>
+                            </div>
+                            <div id="fishbone-container" class="w-full min-h-[350px] bg-white border rounded p-4 flex items-center justify-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 管制圖 -->
+            <div id="tab-control" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold">管制圖表格輸入 (Xbar-R / Control Chart)</h2>
+                        <div class="space-x-2">
+                            <button onclick="loadDemoData('control')" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded">載入範例</button>
+                            <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded">儲存至資料庫</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1">
+                            <table class="w-full border text-sm">
+                                <thead class="bg-slate-100">
+                                    <tr><th class="p-2 border">組別 (Subgroup)</th><th class="p-2 border">數值 (Value)</th><th class="w-10"></th></tr>
+                                </thead>
+                                <tbody id="control-tbody"></tbody>
+                            </table>
+                            <button onclick="addControlRow()" class="mt-2 text-sm text-blue-600 hover:underline">+ 新增組別</button>
+                        </div>
+                        <div class="md:col-span-2 bg-slate-50 p-4 rounded-lg border flex flex-col items-center justify-center relative">
+                            <div class="w-full flex justify-end mb-2">
+                                <button onclick="exportSingleChart('controlChart', '管制圖.png')" class="text-xs bg-white border px-3 py-1 rounded shadow-sm hover:bg-slate-100">📥 下載此圖 PNG</button>
+                            </div>
+                            <div class="w-full h-80"><canvas id="controlChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 直方圖 -->
+            <div id="tab-histogram" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold">直方圖數據輸入 (Histogram)</h2>
+                        <div class="space-x-2">
+                            <button onclick="loadDemoData('histogram')" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded">載入範例</button>
+                            <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded">儲存至資料庫</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1 space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">輸入原始數據 (用逗號或換行分隔)</label>
+                                <textarea id="histo-data-input" rows="8" class="w-full p-2 border rounded text-sm" placeholder="10.2, 10.5, 9.8, 10.1..." oninput="renderHistogram()"></textarea>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-slate-50 p-4 rounded-lg border flex flex-col items-center justify-center relative">
+                            <div class="w-full flex justify-end mb-2">
+                                <button onclick="exportSingleChart('histoChart', '直方圖.png')" class="text-xs bg-white border px-3 py-1 rounded shadow-sm hover:bg-slate-100">📥 下載此圖 PNG</button>
+                            </div>
+                            <div class="w-full h-80"><canvas id="histoChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 散佈圖 -->
+            <div id="tab-scatter" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold">散佈圖數據輸入 (Scatter Plot)</h2>
+                        <div class="space-x-2">
+                            <button onclick="loadDemoData('scatter')" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded">載入範例</button>
+                            <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded">儲存至資料庫</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1">
+                            <table class="w-full border text-sm">
+                                <thead class="bg-slate-100">
+                                    <tr><th class="p-2 border">X 變數</th><th class="p-2 border">Y 變數</th><th class="w-10"></th></tr>
+                                </thead>
+                                <tbody id="scatter-tbody"></tbody>
+                            </table>
+                            <button onclick="addScatterRow()" class="mt-2 text-sm text-blue-600 hover:underline">+ 新增數據點</button>
+                        </div>
+                        <div class="md:col-span-2 bg-slate-50 p-4 rounded-lg border flex flex-col items-center justify-center relative">
+                            <div class="w-full flex justify-end mb-2">
+                                <button onclick="exportSingleChart('scatterChart', '散佈圖.png')" class="text-xs bg-white border px-3 py-1 rounded shadow-sm hover:bg-slate-100">📥 下載此圖 PNG</button>
+                            </div>
+                            <div class="w-full h-80"><canvas id="scatterChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 資料與匯出 -->
+            <div id="tab-data" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
+                    <h2 class="text-lg font-bold">資料管理與 Excel 匯入/匯出</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-4 border rounded-lg bg-slate-50 space-y-3">
+                            <h3 class="font-semibold text-sm text-slate-700">Excel 資料交換</h3>
+                            <p class="text-xs text-slate-500">一鍵將所有圖表的數據匯出為多工作表 Excel 檔案，或上傳 Excel 檔案還原資料。</p>
+                            <div class="flex space-x-3 pt-2">
+                                <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded font-medium">📥 匯出完整 Excel</button>
+                                <label class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded font-medium cursor-pointer">
+                                    📤 匯入 Excel 檔案
+                                    <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden" onchange="importExcel(event)">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="p-4 border rounded-lg bg-slate-50 space-y-3">
+                            <h3 class="font-semibold text-sm text-slate-700">PNG 圖片批次匯出</h3>
+                            <p class="text-xs text-slate-500">一次性將系統中產生的所有圖表下載為 PNG 圖片檔。</p>
+                            <div class="pt-2">
+                                <button onclick="exportAllPNG()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2 rounded font-medium">📸 一鍵匯出所有圖表 PNG</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // Firebase 設置
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnF5GpMceUXSXw6U58FfSTd_TCJC-qD9g",
+            authDomain: "multichart-4ab70.firebaseapp.com",
+            projectId: "multichart-4ab70",
+            storageBucket: "multichart-4ab70.firebasestorage.app",
+            messagingSenderId: "538088540197",
+            appId: "1:538088540197:web:8f4c5f2f4e99d780ced7cc",
+            measurementId: "G-1CP5NSJZ2R"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        let currentUser = null;
+        let charts = {};
+
+        // 預設資料 (包含 VSM)
+        let appData = {
+            vsm: [
+                { process: "CNC 加工", ct: 45, co: 15 },
+                { process: "去毛邊", ct: 20, co: 5 },
+                { process: "電鍍 (ENP)", ct: 60, co: 30 },
+                { process: "CMM 檢驗", ct: 25, co: 10 }
+            ],
+            pareto: [
+                { item: "尺寸超差", count: 45 },
+                { item: "表面刮傷", count: 25 },
+                { item: "毛邊過大", count: 15 },
+                { item: "孔徑偏心", count: 10 },
+                { item: "其他", count: 5 }
+            ],
+            fishbone: {
+                problem: "加工尺寸不穩定",
+                categories: {
+                    "人員 (Man)": "未嚴格執行首件檢查, 經驗不足",
+                    "機器 (Machine)": "主軸軸承磨損, 夾爪夾持力不足",
+                    "材料 (Material)": "硬度不均, 批次差異大",
+                    "方法 (Method)": "切削速度過快, 程式進給率未最佳化",
+                    "環境 (Environment)": "室溫變化大導致熱膨脹"
+                }
+            },
+            control: [
+                { subgroup: "1", value: 10.02 },
+                { subgroup: "2", value: 9.98 },
+                { subgroup: "3", value: 10.05 },
+                { subgroup: "4", value: 9.95 },
+                { subgroup: "5", value: 10.01 },
+                { subgroup: "6", value: 10.03 }
+            ],
+            histogram: [9.95, 9.98, 10.01, 10.02, 10.00, 9.99, 10.03, 10.04, 9.97, 10.01, 10.02, 10.05, 9.96, 10.00],
+            scatter: [
+                { x: 10, y: 15 }, { x: 20, y: 28 }, { x: 30, y: 35 },
+                { x: 40, y: 52 }, { x: 50, y: 58 }, { x: 60, y: 75 }
+            ]
+        };
+
+        // 監聽 Auth
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('user-email-display').textContent = user.email;
+                initFirebaseConnectionMonitor();
+                loadDataFromFirebase();
+            } else {
+                currentUser = null;
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('app-screen').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(err => {
+                const errDiv = document.getElementById('login-error');
+                errDiv.textContent = "登入失敗: " + err.message;
+                errDiv.classList.remove('hidden');
+            });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => { auth.signOut(); });
+
+        function initFirebaseConnectionMonitor() {
+            database.ref(".info/connected").on("value", (snap) => {
+                const dot = document.getElementById('conn-dot');
+                const status = document.getElementById('conn-status');
+                if (snap.val() === true) {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+                    status.textContent = "資料庫已連線";
+                } else {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+                    status.textContent = "連線中斷";
+                }
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn py-3 px-4 font-medium text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap";
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            event.currentTarget.className = "tab-btn py-3 px-4 font-medium text-sm border-b-2 border-blue-600 text-blue-600 whitespace-nowrap";
+            setTimeout(() => { updateAllCharts(); }, 50);
+        }
+
+        function saveData() {
+            if (!currentUser) return;
+            gatherDataFromDOM();
+            const dataRef = database.ref('users/' + currentUser.uid + '/qcData');
+            const now = new Date().toLocaleString();
+            dataRef.set({ data: appData, lastSaved: now }).then(() => {
+                document.getElementById('last-saved-time').textContent = now;
+                alert('資料已成功儲存至 Firebase Realtime Database！');
+            }).catch(err => { alert('儲存失敗: ' + err.message); });
+        }
+
+        function loadDataFromFirebase() {
+            if (!currentUser) return;
+            database.ref('users/' + currentUser.uid + '/qcData').once('value').then(snapshot => {
+                const val = snapshot.val();
+                if (val && val.data) {
+                    appData = val.data;
+                    if (val.lastSaved) document.getElementById('last-saved-time').textContent = val.lastSaved;
+                }
+                populateDOMFromData();
+                updateAllCharts();
+            });
+        }
+
+        function loadDemoData(type) {
+            populateDOMFromData();
+            updateAllCharts();
+            alert('已載入示範資料！');
+        }
+
+        function gatherDataFromDOM() {
+            // VSM
+            const vsmRows = document.querySelectorAll('#vsm-tbody tr');
+            appData.vsm = Array.from(vsmRows).map(row => ({
+                process: row.querySelector('.v-proc').value,
+                ct: Number(row.querySelector('.v-ct').value) || 0,
+                co: Number(row.querySelector('.v-co').value) || 0
+            }));
+
+            // Pareto
+            appData.pareto = Array.from(document.querySelectorAll('#pareto-tbody tr')).map(row => ({
+                item: row.querySelector('.p-item').value,
+                count: Number(row.querySelector('.p-count').value) || 0
+            }));
+
+            // Fishbone
+            appData.fishbone.problem = document.getElementById('fish-problem').value;
+            document.querySelectorAll('.fish-cat-input').forEach(input => {
+                appData.fishbone.categories[input.dataset.cat] = input.value;
+            });
+
+            // Control
+            appData.control = Array.from(document.querySelectorAll('#control-tbody tr')).map(row => ({
+                subgroup: row.querySelector('.c-sub').value,
+                value: Number(row.querySelector('.c-val').value) || 0
+            }));
+
+            // Histogram
+            appData.histogram = document.getElementById('histo-data-input').value.split(/[\n,]/).map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+
+            // Scatter
+            appData.scatter = Array.from(document.querySelectorAll('#scatter-tbody tr')).map(row => ({
+                x: Number(row.querySelector('.s-x').value) || 0,
+                y: Number(row.querySelector('.s-y').value) || 0
+            }));
+        }
+
+        function populateDOMFromData() {
+            // VSM
+            const vTbody = document.getElementById('vsm-tbody');
+            vTbody.innerHTML = '';
+            appData.vsm.forEach(d => addVsmRow(d.process, d.ct, d.co));
+
+            // Pareto
+            const pTbody = document.getElementById('pareto-tbody');
+            pTbody.innerHTML = '';
+            appData.pareto.forEach(d => addParetoRow(d.item, d.count));
+
+            // Fishbone
+            document.getElementById('fish-problem').value = appData.fishbone.problem || '';
+            const fishDiv = document.getElementById('fish-categories-inputs');
+            fishDiv.innerHTML = '';
+            for (let [cat, val] of Object.entries(appData.fishbone.categories)) {
+                fishDiv.innerHTML += `
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">${cat}</label>
+                        <input type="text" data-cat="${cat}" class="fish-cat-input w-full px-3 py-2 border rounded text-sm" value="${val}" oninput="renderFishbone()">
+                    </div>
+                `;
+            }
+
+            // Control
+            const cTbody = document.getElementById('control-tbody');
+            cTbody.innerHTML = '';
+            appData.control.forEach(d => addControlRow(d.subgroup, d.value));
+
+            // Histogram
+            document.getElementById('histo-data-input').value = appData.histogram.join(', ');
+
+            // Scatter
+            const sTbody = document.getElementById('scatter-tbody');
+            sTbody.innerHTML = '';
+            appData.scatter.forEach(d => addScatterRow(d.x, d.y));
+
+            renderFishbone();
+            renderVSM();
+        }
+
+        function addVsmRow(proc = '', ct = '', co = '') {
+            const tbody = document.getElementById('vsm-tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-1 border"><input type="text" class="v-proc w-full p-1 text-xs border-0 focus:ring-0" value="${proc}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border"><input type="number" class="v-ct w-full p-1 text-xs border-0 focus:ring-0" value="${ct}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border"><input type="number" class="v-co w-full p-1 text-xs border-0 focus:ring-0" value="${co}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border text-center"><button onclick="this.closest('tr').remove(); updateAllCharts();" class="text-red-500 font-bold">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function addParetoRow(item = '', count = '') {
+            const tbody = document.getElementById('pareto-tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-1 border"><input type="text" class="p-item w-full p-1 text-sm border-0 focus:ring-0" value="${item}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border"><input type="number" class="p-count w-full p-1 text-sm border-0 focus:ring-0" value="${count}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border text-center"><button onclick="this.closest('tr').remove(); updateAllCharts();" class="text-red-500 font-bold">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function addControlRow(sub = '', val = '') {
+            const tbody = document.getElementById('control-tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-1 border"><input type="text" class="c-sub w-full p-1 text-sm border-0 focus:ring-0" value="${sub}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border"><input type="number" class="c-val w-full p-1 text-sm border-0 focus:ring-0" value="${val}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border text-center"><button onclick="this.closest('tr').remove(); updateAllCharts();" class="text-red-500 font-bold">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function addScatterRow(x = '', y = '') {
+            const tbody = document.getElementById('scatter-tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-1 border"><input type="number" class="s-x w-full p-1 text-sm border-0 focus:ring-0" value="${x}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border"><input type="number" class="s-y w-full p-1 text-sm border-0 focus:ring-0" value="${y}" oninput="updateAllCharts()"></td>
+                <td class="p-1 border text-center"><button onclick="this.closest('tr').remove(); updateAllCharts();" class="text-red-500 font-bold">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function updateAllCharts() {
+            gatherDataFromDOM();
+            renderVSM();
+            renderPareto();
+            renderControl();
+            renderHistogram();
+            renderScatter();
+            renderFishbone();
+        }
+
+        // 0. 價值流 VSM 繪製
+        function renderVSM() {
+            const container = document.getElementById('vsm-container');
+            if (!container) return;
+            let steps = appData.vsm;
+            let totalPT = steps.reduce((sum, s) => sum + s.ct, 0);
+            let totalLT = totalPT + steps.reduce((sum, s) => sum + (s.co * 60), 0); // 簡易 Lead Time 計算
+
+            document.getElementById('vsm-pt').textContent = totalPT;
+            document.getElementById('vsm-lt').textContent = totalLT;
+
+            let svgWidth = Math.max(800, steps.length * 150 + 100);
+            let svg = `<svg viewBox="0 0 ${svgWidth} 380" class="w-full h-full max-h-[360px]">
+                <!-- 標題與基準線 -->
+                <text x="20" y="30" font-size="14" font-weight="bold" fill="#1e293b">Value Stream Mapping (VSM) - 生產價值流圖</text>
+                <line x1="20" y1="220" x2="${svgWidth - 20}" y2="220" stroke="#94a3b8" stroke-width="2"/>
+            `;
+
+            let startX = 60;
+            steps.forEach((s, idx) => {
+                let x = startX + idx * 160;
+                // 工序方框
+                svg += `
+                    <rect x="${x}" y="70" width="120" height="90" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+                    <rect x="${x}" y="70" width="120" height="25" fill="#3b82f6" rx="4"/>
+                    <text x="${x + 60}" y="87" fill="white" font-size="11" font-weight="bold" text-anchor="middle">${s.process}</text>
+                    <text x="${x + 10}" y="115" fill="#334155" font-size="10">C/T: ${s.ct} 秒</text>
+                    <text x="${x + 10}" y="135" fill="#334155" font-size="10">C/O: ${s.co} 分</text>
+                `;
+
+                // 箭頭連接
+                if (idx < steps.length - 1) {
+                    svg += `<polygon points="${x + 125},110 ${x + 155},110 ${x + 155},105 ${x + 165},115 ${x + 155},125 ${x + 155},120 ${x + 125},120" fill="#64748b"/>`;
+                }
+
+                // 下方時間軸階梯 (Lead Time Ladder)
+                svg += `
+                    <line x1="${x}" y1="220" x2="${x}" y2="250" stroke="#ef4444" stroke-width="1.5"/>
+                    <line x1="${x}" y1="250" x2="${x + 60}" y2="250" stroke="#ef4444" stroke-width="1.5"/>
+                    <text x="${x + 30}" y="270" fill="#ef4444" font-size="10" text-anchor="middle">PT:${s.ct}s</text>
+                    <line x1="${x + 60}" y1="250" x2="${x + 60}" y2="220" stroke="#ef4444" stroke-width="1.5"/>
+                `;
+            });
+
+            svg += `</svg>`;
+            container.innerHTML = svg;
+        }
+
+        function exportVSMPNG() {
+            const svgElement = document.querySelector('#vsm-container svg');
+            if (!svgElement) return;
+            const svgString = new XMLSerializer().serializeToString(svgElement);
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const URL = window.URL || window.webkitURL || window;
+            const blobURL = URL.createObjectURL(blob);
+            const image = new Image();
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 900;
+                canvas.height = 380;
+                const context = canvas.getContext('2d');
+                context.fillStyle = '#ffffff';
+                context.fillRect(0, 0, 900, 380);
+                context.drawImage(image, 0, 0);
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = '價值流圖(VSM).png';
+                a.click();
+            };
+            image.src = blobURL;
+        }
+
+        // 1. 柏拉圖
+        function renderPareto() {
+            const ctx = document.getElementById('paretoChart');
+            if (!ctx) return;
+            let sorted = [...appData.pareto].sort((a, b) => b.count - a.count);
+            let labels = sorted.map(d => d.item);
+            let counts = sorted.map(d => d.count);
+            let total = counts.reduce((a, b) => a + b, 0) || 1;
+            let cumSum = 0;
+            let cumPercent = counts.map(c => { cumSum += c; return Number(((cumSum / total) * 100).toFixed(1)); });
+
+            if (charts.pareto) charts.pareto.destroy();
+            charts.pareto = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: '不良數', data: counts, backgroundColor: '#3b82f6', yAxisID: 'y', order: 2 },
+                        { label: '累積百分比 (%)', data: cumPercent, type: 'line', borderColor: '#ef4444', backgroundColor: '#ef4444', yAxisID: 'y1', order: 1, tension: 0.1 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, position: 'left', title: { display: true, text: '次數' } },
+                        y1: { beginAtZero: true, max: 100, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '累積 %' } }
+                    }
+                }
+            });
+        }
+
+        // 2. 魚骨圖
+        function renderFishbone() {
+            const container = document.getElementById('fishbone-container');
+            if (!container) return;
+            const prob = appData.fishbone.problem || "核心問題";
+            let cats = appData.fishbone.categories;
+
+            let svg = `<svg viewBox="0 0 800 400" class="w-full h-full max-h-[350px]">
+                <line x1="50" y1="200" x2="700" y2="200" stroke="#1e293b" stroke-width="4"/>
+                <polygon points="700,190 730,200 700,210" fill="#1e293b"/>
+                <rect x="735" y="175" width="60" height="50" rx="6" fill="#3b82f6"/>
+                <text x="765" y="205" fill="white" font-size="12" font-weight="bold" text-anchor="middle">${prob}</text>
+            `;
+
+            let topCats = Object.entries(cats).slice(0, 3);
+            let botCats = Object.entries(cats).slice(3, 5);
+
+            topCats.forEach(([cat, val], idx) => {
+                let x = 180 + idx * 180;
+                svg += `
+                    <line x1="${x}" y1="200" x2="${x - 60}" y2="80" stroke="#64748b" stroke-width="2"/>
+                    <text x="${x - 55}" y="70" fill="#1e293b" font-size="11" font-weight="bold">${cat}</text>
+                    <line x1="${x - 45}" y1="110" x2="${x + 20}" y2="110" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4"/>
+                    <text x="${x - 45}" y="105" fill="#475569" font-size="10">${val.split(',')[0] || ''}</text>
+                `;
+            });
+
+            botCats.forEach(([cat, val], idx) => {
+                let x = 270 + idx * 180;
+                svg += `
+                    <line x1="${x}" y1="200" x2="${x - 60}" y2="320" stroke="#64748b" stroke-width="2"/>
+                    <text x="${x - 55}" y="335" fill="#1e293b" font-size="11" font-weight="bold">${cat}</text>
+                    <line x1="${x - 45}" y1="290" x2="${x + 20}" y2="290" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4"/>
+                    <text x="${x - 45}" y="285" fill="#475569" font-size="10">${val.split(',')[0] || ''}</text>
+                `;
+            });
+
+            svg += `</svg>`;
+            container.innerHTML = svg;
+        }
+
+        // 3. 管制圖
+        function renderControl() {
+            const ctx = document.getElementById('controlChart');
+            if (!ctx) return;
+            let labels = appData.control.map(d => d.subgroup);
+            let values = appData.control.map(d => d.value);
+            let mean = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+            let ucl = mean * 1.05;
+            let lcl = mean * 0.95;
+
+            if (charts.control) charts.control.destroy();
+            charts.control = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: '數值', data: values, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.1 },
+                        { label: '平均線 (CL)', data: Array(values.length).fill(mean), borderColor: '#10b981', borderDash: [5, 5], pointRadius: 0 },
+                        { label: '上管制界限 (UCL)', data: Array(values.length).fill(ucl), borderColor: '#ef4444', borderDash: [2, 2], pointRadius: 0 },
+                        { label: '下管制界限 (LCL)', data: Array(values.length).fill(lcl), borderColor: '#ef4444', borderDash: [2, 2], pointRadius: 0 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // 4. 直方圖
+        function renderHistogram() {
+            const ctx = document.getElementById('histoChart');
+            if (!ctx) return;
+            let data = appData.histogram;
+            if (data.length === 0) return;
+            let min = Math.min(...data);
+            let max = Math.max(...data);
+            let bins = 6;
+            let width = (max - min) / bins || 1;
+            let counts = Array(bins).fill(0);
+            let labels = [];
+
+            for (let i = 0; i < bins; i++) {
+                let bStart = min + i * width;
+                labels.push(`${bStart.toFixed(1)}~${(bStart + width).toFixed(1)}`);
+            }
+            data.forEach(val => {
+                let idx = Math.floor((val - min) / width);
+                if (idx >= bins) idx = bins - 1;
+                if (idx >= 0) counts[idx]++;
+            });
+
+            if (charts.histo) charts.histo.destroy();
+            charts.histo = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: '頻率', data: counts, backgroundColor: '#8b5cf6', barPercentage: 1.0, categoryPercentage: 1.0 }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // 5. 散佈圖
+        function renderScatter() {
+            const ctx = document.getElementById('scatterChart');
+            if (!ctx) return;
+            if (charts.scatter) charts.scatter.destroy();
+            charts.scatter = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: [{ label: 'XY 變數對應', data: appData.scatter, backgroundColor: '#f59e0b' }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function exportSingleChart(chartId, filename) {
+            const canvas = document.getElementById(chartId);
+            if (canvas) {
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = filename;
+                a.click();
+            }
+        }
+
+        function exportFishbonePNG() {
+            const svgElement = document.querySelector('#fishbone-container svg');
+            if (!svgElement) return;
+            const blob = new Blob([new XMLSerializer().serializeToString(svgElement)], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const image = new Image();
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 800;
+                canvas.height = 400;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 800, 400);
+                ctx.drawImage(image, 0, 0);
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = '魚骨圖.png';
+                a.click();
+            };
+            image.src = url;
+        }
+
+        function exportAllPNG() {
+            exportVSMPNG();
+            setTimeout(() => exportSingleChart('paretoChart', '1_柏拉圖.png'), 300);
+            setTimeout(() => exportFishbonePNG(), 600);
+            setTimeout(() => exportSingleChart('controlChart', '3_管制圖.png'), 900);
+            setTimeout(() => exportSingleChart('histoChart', '4_直方圖.png'), 1200);
+            setTimeout(() => exportSingleChart('scatterChart', '5_散佈圖.png'), 1500);
+        }
+
+        function exportExcel() {
+            gatherDataFromDOM();
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.vsm), "價值流(VSM)");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.pareto), "柏拉圖");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.control), "管制圖");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.histogram.map(v => ({ 數據數值: v }))), "直方圖");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData.scatter), "散佈圖");
+            XLSX.writeFile(wb, "品管與精實生產數據表.xlsx");
+        }
+
+        function importExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                if (workbook.Sheets["價值流(VSM)"]) appData.vsm = XLSX.utils.sheet_to_json(workbook.Sheets["價值流(VSM)"]);
+                if (workbook.Sheets["柏拉圖"]) appData.pareto = XLSX.utils.sheet_to_json(workbook.Sheets["柏拉圖"]);
+                if (workbook.Sheets["管制圖"]) appData.control = XLSX.utils.sheet_to_json(workbook.Sheets["管制圖"]);
+                if (workbook.Sheets["直方圖"]) appData.histogram = XLSX.utils.sheet_to_json(workbook.Sheets["直方圖"]).map(r => r["數據數值"]).filter(v => v !== undefined);
+                if (workbook.Sheets["散佈圖"]) appData.scatter = XLSX.utils.sheet_to_json(workbook.Sheets["散佈圖"]);
+                populateDOMFromData();
+                updateAllCharts();
+                alert('Excel 匯入成功！');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        window.onload = () => { populateDOMFromData(); };
+    </script>
+</body>
+</html>
